@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Camera, Upload, Wand2, Clock, X, Volume2, VolumeX, Send, Loader2, Sparkles, MessageCircle } from 'lucide-react';
+import { Camera, Upload, Wand2, Clock, X, Volume2, VolumeX, Send, Loader2, Sparkles, MessageCircle, Globe } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 
@@ -22,6 +22,7 @@ const SolverPage = () => {
   const [solution, setSolution] = useState<SolutionData | null>(null);
   const [solving, setSolving] = useState(false);
   const [error, setError] = useState('');
+  const [solutionLang, setSolutionLang] = useState<'en' | 'hi'>(lang as 'en' | 'hi');
 
   // TTS
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -268,11 +269,34 @@ const SolverPage = () => {
             </div>
           </div>
 
-          {/* TTS Language indicator */}
+          {/* Solution Language Toggle */}
           <div className="flex justify-center">
-            <span className="text-xs text-muted-foreground bg-card border border-border px-3 py-1 rounded-full">
-              🔊 {t('Voice: English', 'आवाज़: हिंदी')} • {t('Switch language in top bar', 'भाषा बदलने के लिए ऊपर देखें')}
-            </span>
+            <div className="flex items-center gap-2 bg-card border border-border rounded-full p-1">
+              <button
+                onClick={() => setSolutionLang('en')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-display font-bold transition-all ${solutionLang === 'en' ? 'gradient-primary text-primary-foreground shadow-warm' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <Globe className="w-3 h-3" /> English
+              </button>
+              <button
+                onClick={() => setSolutionLang('hi')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-display font-bold transition-all ${solutionLang === 'hi' ? 'gradient-primary text-primary-foreground shadow-warm' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <Globe className="w-3 h-3" /> हिंदी
+              </button>
+            </div>
+          </div>
+
+          {/* Explanation in selected language */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="bg-muted/50 rounded-xl p-3 border border-border">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{solutionLang === 'en' ? 'Traditional Explanation' : 'पारंपरिक व्याख्या'}</p>
+              <p className="text-xs text-foreground leading-relaxed">{solutionLang === 'en' ? solution.traditional.explanation_en : solution.traditional.explanation_hi}</p>
+            </div>
+            <div className="bg-primary/5 rounded-xl p-3 border border-primary/20">
+              <p className="text-[10px] font-bold text-primary uppercase mb-1">{solutionLang === 'en' ? 'Vedic Explanation' : 'वैदिक व्याख्या'}</p>
+              <p className="text-xs text-foreground leading-relaxed">{solutionLang === 'en' ? solution.vedic.explanation_en : solution.vedic.explanation_hi}</p>
+            </div>
           </div>
 
           {/* Dual Solutions Grid */}
@@ -318,10 +342,41 @@ const SolverPage = () => {
             </div>
           </div>
 
-          {/* Speed comparison */}
-          <div className="bg-primary/10 rounded-xl p-4 text-center border border-primary/20">
-            <p className="text-sm font-bold text-primary">🚀 {t(`Vedic method is ${solution.speedup} faster!`, `वैदिक विधि ${solution.speedup} तेज है!`)}</p>
-          </div>
+          {/* Time Comparison Bars */}
+          {(() => {
+            const parseTime = (t: string) => parseFloat(t.replace(/[^0-9.]/g, '')) || 1;
+            const tradTime = parseTime(solution.traditional.time);
+            const vedTime = parseTime(solution.vedic.time);
+            const maxTime = Math.max(tradTime, vedTime);
+            const tradPercent = (tradTime / maxTime) * 100;
+            const vedPercent = (vedTime / maxTime) * 100;
+            return (
+              <div className="bg-card rounded-xl p-4 shadow-card border border-border space-y-3">
+                <h4 className="font-display font-bold text-sm text-center">{t('⏱ Time Comparison', '⏱ समय तुलना')}</h4>
+                <div className="space-y-2">
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="font-semibold text-destructive">{t('Traditional', 'पारंपरिक')}</span>
+                      <span className="font-bold text-destructive">{solution.traditional.time}</span>
+                    </div>
+                    <div className="h-4 bg-muted rounded-full overflow-hidden">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${tradPercent}%` }} transition={{ duration: 0.8, delay: 0.2 }} className="h-full bg-destructive/70 rounded-full" />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="font-semibold text-green-600 dark:text-green-400">{t('Vedic Math', 'वैदिक गणित')} ⚡</span>
+                      <span className="font-bold text-green-600 dark:text-green-400">{solution.vedic.time}</span>
+                    </div>
+                    <div className="h-4 bg-muted rounded-full overflow-hidden">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${vedPercent}%` }} transition={{ duration: 0.8, delay: 0.4 }} className="h-full bg-green-500 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+                <p className="text-center text-xs font-bold text-green-600 dark:text-green-400">🚀 {t(`Vedic method is ${solution.speedup} faster!`, `वैदिक विधि ${solution.speedup} तेज है!`)}</p>
+              </div>
+            );
+          })()}
 
           {/* Image preview if used */}
           {capturedImage && (

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { BookOpen, Brain, Calculator, Camera, Video, User, Info, Menu, X } from 'lucide-react';
+import { BookOpen, Brain, Calculator, Camera, Video, User, Info, Menu, X, ScrollText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
   { path: '/abacus', icon: Calculator, labelEn: 'Abacus', labelHi: 'अबेकस' },
   { path: '/solver', icon: Camera, labelEn: 'Solver', labelHi: 'सॉल्वर' },
   { path: '/videos', icon: Video, labelEn: 'Videos', labelHi: 'वीडियो' },
+  { path: '/sutras', icon: ScrollText, labelEn: 'Sutras', labelHi: 'सूत्र' },
   { path: '/profile', icon: User, labelEn: 'Profile', labelHi: 'प्रोफाइल' },
   { path: '/about', icon: Info, labelEn: 'About', labelHi: 'हमारे बारे में' },
 ];
