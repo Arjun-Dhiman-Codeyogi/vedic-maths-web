@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Heart, Target, BookOpen, Users, Star, Mail, Github, Globe, Sparkles, GraduationCap } from 'lucide-react';
+import { Heart, Target, BookOpen, Users, Star, Mail, Github, Globe, Sparkles, GraduationCap, Code, Linkedin, Twitter } from 'lucide-react';
+import arjunPhoto from '@/assets/arjun-dhiman.jpg';
 
 const AboutPage = () => {
   const { t } = useLanguage();
@@ -149,6 +150,45 @@ const AboutPage = () => {
           <a href="#" className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
             <Globe className="w-5 h-5" />
           </a>
+        </div>
+      </motion.div>
+
+      {/* About Developer */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.65 }}
+        className="bg-card rounded-xl p-5 shadow-card border border-border"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <Code className="w-5 h-5 text-primary" />
+          <h2 className="font-display font-bold text-base">{t('About the Developer', 'डेवलपर के बारे में')}</h2>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-5">
+          <div className="w-28 h-28 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-elevated shrink-0">
+            <img src={arjunPhoto} alt="Arjun Dhiman" className="w-full h-full object-cover" />
+          </div>
+          <div className="text-center sm:text-left">
+            <h3 className="font-display font-bold text-lg">{t('Arjun Dhiman', 'अर्जुन धीमान')}</h3>
+            <p className="text-sm text-primary font-semibold">{t('Founder & Developer', 'संस्थापक और डेवलपर')}</p>
+            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+              {t(
+                'Passionate about making mathematics accessible and enjoyable for every student through technology. Built MathGenius to bridge the gap between ancient Vedic wisdom and modern learning.',
+                'प्रौद्योगिकी के माध्यम से हर छात्र के लिए गणित को सुलभ और आनंददायक बनाने के प्रति उत्साही। प्राचीन वैदिक ज्ञान और आधुनिक शिक्षा के बीच की खाई को पाटने के लिए MathGenius बनाया।'
+              )}
+            </p>
+            <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
+              <a href="#" className="w-8 h-8 bg-muted rounded-full flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-all">
+                <Github className="w-4 h-4" />
+              </a>
+              <a href="#" className="w-8 h-8 bg-muted rounded-full flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-all">
+                <Linkedin className="w-4 h-4" />
+              </a>
+              <a href="#" className="w-8 h-8 bg-muted rounded-full flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-all">
+                <Twitter className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
         </div>
       </motion.div>
 
