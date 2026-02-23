@@ -4,21 +4,58 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { Check, Timer, Zap, Brain, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useSearchParams } from 'react-router-dom';
 
 type Difficulty = 'easy' | 'medium' | 'hard';
-type Operation = '+' | '-' | '×' | '÷' | 'x²' | '√' | 'x³' | '∛' | '%' | 'alg';
+type PracticeCategory = 'vedic' | 'finger' | 'brain';
 
-const operationLabels: Record<Operation, { en: string; hi: string }> = {
-  '+': { en: 'Add', hi: 'जोड़' },
-  '-': { en: 'Sub', hi: 'घटाव' },
-  '×': { en: 'Mul', hi: 'गुणा' },
-  '÷': { en: 'Div', hi: 'भाग' },
-  'x²': { en: 'Square', hi: 'वर्ग' },
-  '√': { en: 'Root', hi: 'मूल' },
-  'x³': { en: 'Cube', hi: 'घन' },
-  '∛': { en: 'CubeRt', hi: 'घनमूल' },
-  '%': { en: 'Percent', hi: 'प्रतिशत' },
-  'alg': { en: 'Algebra', hi: 'बीजगणित' },
+type VedicOp = '+' | '-' | '×' | '÷' | 'x²' | '√' | 'x³' | '∛' | '%' | 'alg';
+type FingerOp = 'f-count' | 'f-add' | 'f-sub' | 'f-mul' | 'f-9table';
+type BrainOp = 'b-visual' | 'b-speed' | 'b-pattern' | 'b-mental' | 'b-focus';
+type Operation = VedicOp | FingerOp | BrainOp;
+
+const categoryOps: Record<PracticeCategory, { ops: Operation[]; labels: Record<string, { en: string; hi: string }> }> = {
+  vedic: {
+    ops: ['+', '-', '×', '÷', 'x²', '√', 'x³', '∛', '%', 'alg'],
+    labels: {
+      '+': { en: 'Add', hi: 'जोड़' },
+      '-': { en: 'Sub', hi: 'घटाव' },
+      '×': { en: 'Mul', hi: 'गुणा' },
+      '÷': { en: 'Div', hi: 'भाग' },
+      'x²': { en: 'Square', hi: 'वर्ग' },
+      '√': { en: 'Root', hi: 'मूल' },
+      'x³': { en: 'Cube', hi: 'घन' },
+      '∛': { en: 'CubeRt', hi: 'घनमूल' },
+      '%': { en: 'Percent', hi: 'प्रतिशत' },
+      'alg': { en: 'Algebra', hi: 'बीजगणित' },
+    },
+  },
+  finger: {
+    ops: ['f-count', 'f-add', 'f-sub', 'f-mul', 'f-9table'],
+    labels: {
+      'f-count': { en: 'Count', hi: 'गिनती' },
+      'f-add': { en: 'Add', hi: 'जोड़' },
+      'f-sub': { en: 'Sub', hi: 'घटाव' },
+      'f-mul': { en: 'Mul', hi: 'गुणा' },
+      'f-9table': { en: '9 Table', hi: '9 पहाड़ा' },
+    },
+  },
+  brain: {
+    ops: ['b-visual', 'b-speed', 'b-pattern', 'b-mental', 'b-focus'],
+    labels: {
+      'b-visual': { en: 'Visual', hi: 'दृश्य' },
+      'b-speed': { en: 'Speed', hi: 'गति' },
+      'b-pattern': { en: 'Pattern', hi: 'पैटर्न' },
+      'b-mental': { en: 'Mental', hi: 'मानसिक' },
+      'b-focus': { en: 'Focus', hi: 'ध्यान' },
+    },
+  },
+};
+
+const categoryLabels: Record<PracticeCategory, { en: string; hi: string }> = {
+  vedic: { en: 'Vedic Math', hi: 'वैदिक गणित' },
+  finger: { en: 'Finger Math', hi: 'उंगली गणित' },
+  brain: { en: 'Brain Dev', hi: 'मस्तिष्क विकास' },
 };
 
 interface Problem {
@@ -27,7 +64,99 @@ interface Problem {
   hint: { en: string; hi: string };
 }
 
-const generateProblem = (difficulty: Difficulty, operation: Operation): Problem => {
+const generateFingerProblem = (difficulty: Difficulty, op: FingerOp): Problem => {
+  switch (op) {
+    case 'f-count': {
+      // "How many fingers show this number?" — show a number, answer is the number
+      const n = difficulty === 'easy' ? Math.floor(Math.random() * 10) + 1 : difficulty === 'medium' ? Math.floor(Math.random() * 50) + 10 : Math.floor(Math.random() * 99) + 1;
+      return { display: `🖐️ Show ${n} on fingers. How many fingers up?`, answer: n, hint: { en: 'Right hand = 1-5, Left hand = 6-10. Use tens for bigger numbers!', hi: 'दायां हाथ = 1-5, बायां हाथ = 6-10। बड़ी संख्या के लिए दहाई प्रयोग करें!' } };
+    }
+    case 'f-add': {
+      const max = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 10 : 15;
+      const a = Math.floor(Math.random() * max) + 1;
+      const b = Math.floor(Math.random() * max) + 1;
+      return { display: `🖐️ ${a} + ${b}`, answer: a + b, hint: { en: 'Start with bigger number on fingers, count up the smaller one', hi: 'बड़ी संख्या उंगलियों पर रखें, छोटी गिनें' } };
+    }
+    case 'f-sub': {
+      const max = difficulty === 'easy' ? 10 : difficulty === 'medium' ? 15 : 20;
+      const a = Math.floor(Math.random() * max) + 5;
+      const b = Math.floor(Math.random() * Math.min(a, max)) + 1;
+      return { display: `🖐️ ${a} - ${b}`, answer: a - b, hint: { en: 'Show the bigger number, fold down fingers for the smaller', hi: 'बड़ी संख्या दिखाएं, छोटी के लिए उंगलियां मोड़ें' } };
+    }
+    case 'f-mul': {
+      // Finger multiplication for 6-10: hold up (n-5) fingers
+      const a = Math.floor(Math.random() * 5) + 6; // 6-10
+      const b = Math.floor(Math.random() * 5) + 6; // 6-10
+      if (difficulty === 'easy') {
+        const x = Math.floor(Math.random() * 5) + 6;
+        return { display: `🖐️ ${x} × 2`, answer: x * 2, hint: { en: 'Double the number: show it twice on fingers', hi: 'संख्या को दुगुना करें: उंगलियों पर दो बार दिखाएं' } };
+      }
+      return { display: `🖐️ ${a} × ${b}`, answer: a * b, hint: { en: `Hold up ${a - 5} fingers on left, ${b - 5} on right. Touching = tens, remaining multiply = ones`, hi: `बाएं ${a - 5} उंगली, दाएं ${b - 5} उठाएं। छूने वाली = दहाई, बाकी गुणा = इकाई` } };
+    }
+    case 'f-9table': {
+      const n = Math.floor(Math.random() * 10) + 1; // 1-10
+      return { display: `🖐️ 9 × ${n}`, answer: 9 * n, hint: { en: `Fold finger #${n}. Left of fold = tens, right = ones. Answer: ${n - 1}${10 - n}`, hi: `उंगली #${n} मोड़ें। बाईं ओर = दहाई, दाईं = इकाई` } };
+    }
+    default:
+      return { display: '1 + 1', answer: 2, hint: { en: '', hi: '' } };
+  }
+};
+
+const generateBrainProblem = (difficulty: Difficulty, op: BrainOp): Problem => {
+  switch (op) {
+    case 'b-visual': {
+      // Flash number — remember and type it
+      const digits = difficulty === 'easy' ? 2 : difficulty === 'medium' ? 3 : 4;
+      const n = Math.floor(Math.random() * (10 ** digits - 10 ** (digits - 1))) + 10 ** (digits - 1);
+      return { display: `👁️ Remember: ${n}\nWhat was the number?`, answer: n, hint: { en: 'Visualize the number as an image in your mind', hi: 'संख्या को मन में एक चित्र के रूप में देखें' } };
+    }
+    case 'b-speed': {
+      // Quick arithmetic chain
+      const a = Math.floor(Math.random() * 20) + 5;
+      const b = Math.floor(Math.random() * 10) + 1;
+      const c = Math.floor(Math.random() * 5) + 1;
+      if (difficulty === 'easy') {
+        return { display: `⚡ ${a} + ${b} - ${c}`, answer: a + b - c, hint: { en: 'Process left to right quickly!', hi: 'बाएं से दाएं तेजी से हल करें!' } };
+      }
+      const d = Math.floor(Math.random() * 3) + 2;
+      return { display: `⚡ ${a} + ${b} - ${c} × ${d}`, answer: a + b - c * d, hint: { en: 'BODMAS: Multiply first, then add/subtract', hi: 'BODMAS: पहले गुणा, फिर जोड़/घटाव' } };
+    }
+    case 'b-pattern': {
+      // Find the next number in sequence
+      const start = Math.floor(Math.random() * 5) + 1;
+      const step = difficulty === 'easy' ? Math.floor(Math.random() * 5) + 2 : Math.floor(Math.random() * 7) + 3;
+      const isMultiply = difficulty !== 'easy' && Math.random() > 0.5;
+      if (isMultiply) {
+        const base = Math.floor(Math.random() * 3) + 2;
+        const seq = [base, base * 2, base * 4];
+        return { display: `🧩 ${seq[0]}, ${seq[1]}, ${seq[2]}, ?`, answer: base * 8, hint: { en: 'Each number doubles! Multiply by 2', hi: 'हर संख्या दुगुनी! 2 से गुणा करें' } };
+      }
+      const seq = [start, start + step, start + step * 2, start + step * 3];
+      return { display: `🧩 ${seq[0]}, ${seq[1]}, ${seq[2]}, ${seq[3]}, ?`, answer: start + step * 4, hint: { en: `Pattern: adding ${step} each time`, hi: `पैटर्न: हर बार ${step} जोड़ रहे हैं` } };
+    }
+    case 'b-mental': {
+      // Multi-step mental math
+      const a = Math.floor(Math.random() * 30) + 10;
+      const b = Math.floor(Math.random() * 20) + 5;
+      if (difficulty === 'easy') {
+        return { display: `🧠 (${a} + ${b}) × 2`, answer: (a + b) * 2, hint: { en: 'First add, then double the result', hi: 'पहले जोड़ें, फिर परिणाम दुगुना करें' } };
+      }
+      const c = Math.floor(Math.random() * 5) + 2;
+      return { display: `🧠 (${a} + ${b}) × ${c}`, answer: (a + b) * c, hint: { en: 'Solve brackets first, then multiply', hi: 'पहले कोष्ठक हल करें, फिर गुणा' } };
+    }
+    case 'b-focus': {
+      // Reverse number
+      const digits = difficulty === 'easy' ? 2 : difficulty === 'medium' ? 3 : 4;
+      const n = Math.floor(Math.random() * (10 ** digits - 10 ** (digits - 1))) + 10 ** (digits - 1);
+      const reversed = parseInt(String(n).split('').reverse().join(''));
+      return { display: `🎯 Reverse: ${n}`, answer: reversed, hint: { en: 'Read the digits backwards', hi: 'अंकों को उल्टा पढ़ें' } };
+    }
+    default:
+      return { display: '1 + 1', answer: 2, hint: { en: '', hi: '' } };
+  }
+};
+
+const generateVedicProblem = (difficulty: Difficulty, operation: VedicOp): Problem => {
   const range = difficulty === 'easy' ? 20 : difficulty === 'medium' ? 50 : 100;
 
   switch (operation) {
@@ -86,12 +215,40 @@ const generateProblem = (difficulty: Difficulty, operation: Operation): Problem 
   }
 };
 
+const generateProblem = (difficulty: Difficulty, operation: Operation): Problem => {
+  if (operation.startsWith('f-')) return generateFingerProblem(difficulty, operation as FingerOp);
+  if (operation.startsWith('b-')) return generateBrainProblem(difficulty, operation as BrainOp);
+  return generateVedicProblem(difficulty, operation as VedicOp);
+};
+
+const topicToCategory = (topic: string | null): PracticeCategory => {
+  if (!topic) return 'vedic';
+  if (topic.startsWith('f-')) return 'finger';
+  if (topic.startsWith('b-')) return 'brain';
+  return 'vedic';
+};
+
+const topicToOp = (topic: string | null, category: PracticeCategory): Operation => {
+  if (!topic) return categoryOps[category].ops[0];
+  // Map vedic topic ids to operations
+  const vedicMap: Record<string, VedicOp> = { add: '+', sub: '-', mul: '×', div: '÷', sq: 'x²', sqrt: '√', dec: '+', pct: '%', alg: 'alg' };
+  if (category === 'vedic' && vedicMap[topic]) return vedicMap[topic];
+  // For finger/brain, the topic id matches the op
+  if (categoryOps[category].ops.includes(topic as Operation)) return topic as Operation;
+  return categoryOps[category].ops[0];
+};
+
 const PracticePage = () => {
   const { t } = useLanguage();
   const { addXP, updateAccuracy } = useGame();
+  const [searchParams] = useSearchParams();
+  const topicParam = searchParams.get('topic');
+
+  const initialCategory = topicToCategory(topicParam);
+  const [category, setCategory] = useState<PracticeCategory>(initialCategory);
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
-  const [operation, setOperation] = useState<Operation>('+');
-  const [problem, setProblem] = useState<Problem>(generateProblem('easy', '+'));
+  const [operation, setOperation] = useState<Operation>(topicToOp(topicParam, initialCategory));
+  const [problem, setProblem] = useState<Problem>(generateProblem('easy', topicToOp(topicParam, initialCategory)));
   const [userAnswer, setUserAnswer] = useState('');
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null);
   const [score, setScore] = useState(0);
@@ -114,6 +271,13 @@ const PracticePage = () => {
       addXP(score);
     }
   }, [timeLeft]);
+
+  const handleCategoryChange = (cat: PracticeCategory) => {
+    setCategory(cat);
+    const firstOp = categoryOps[cat].ops[0];
+    setOperation(firstOp);
+    setProblem(generateProblem(difficulty, firstOp));
+  };
 
   const startGame = () => {
     setIsPlaying(true);
@@ -157,8 +321,8 @@ const PracticePage = () => {
     else setUserAnswer(prev => prev + key);
   };
 
-  const operations: Operation[] = ['+', '-', '×', '÷', 'x²', '√', 'x³', '∛', '%', 'alg'];
   const difficulties: Difficulty[] = ['easy', 'medium', 'hard'];
+  const categories: PracticeCategory[] = ['vedic', 'finger', 'brain'];
 
   if (!isPlaying) {
     return (
@@ -180,16 +344,29 @@ const PracticePage = () => {
           </motion.div>
         )}
 
+        {/* Category Tabs */}
+        <div>
+          <h3 className="font-display font-bold text-sm mb-2">{t('Category', 'श्रेणी')}</h3>
+          <div className="flex gap-2">
+            {categories.map(cat => (
+              <button key={cat} onClick={() => handleCategoryChange(cat)}
+                className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all ${category === cat ? 'gradient-primary text-primary-foreground shadow-warm' : 'bg-card border border-border text-foreground'}`}
+              >
+                {t(categoryLabels[cat].en, categoryLabels[cat].hi)}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Operation Select */}
         <div>
           <h3 className="font-display font-bold text-sm mb-2">{t('Operation', 'संक्रिया')}</h3>
           <div className="grid grid-cols-5 gap-2">
-            {operations.map(op => (
-              <button key={op} onClick={() => setOperation(op)}
+            {categoryOps[category].ops.map(op => (
+              <button key={op} onClick={() => { setOperation(op); setProblem(generateProblem(difficulty, op)); }}
                 className={`py-2.5 rounded-xl font-display font-bold text-xs transition-all ${operation === op ? 'gradient-primary text-primary-foreground shadow-warm' : 'bg-card border border-border text-foreground'}`}
               >
-                <div>{op}</div>
-                <div className="text-[9px] font-semibold opacity-80 mt-0.5">{t(operationLabels[op].en, operationLabels[op].hi)}</div>
+                <div className="text-[10px] font-semibold opacity-90">{t(categoryOps[category].labels[op].en, categoryOps[category].labels[op].hi)}</div>
               </button>
             ))}
           </div>
@@ -250,11 +427,11 @@ const PracticePage = () => {
             exit={{ opacity: 0, scale: 0.8 }}
             className={`w-full max-w-xs rounded-2xl p-8 text-center shadow-elevated border-2 transition-colors ${result === 'correct' ? 'bg-level/10 border-level' : result === 'wrong' ? 'bg-destructive/10 border-destructive' : 'bg-card border-border'}`}
           >
-            <p className="font-display font-bold text-3xl text-foreground">{problem.display}</p>
+            <p className="font-display font-bold text-2xl text-foreground whitespace-pre-line">{problem.display}</p>
             <p className="text-lg mt-2 font-display font-bold text-muted-foreground">= ?</p>
 
             <button onClick={() => setShowVedicHint(!showVedicHint)} className="mt-3 text-xs text-secondary font-semibold flex items-center gap-1 mx-auto">
-              <Brain className="w-3 h-3" /> {t('Vedic Hint', 'वैदिक संकेत')}
+              <Brain className="w-3 h-3" /> {t('Hint', 'संकेत')}
             </button>
             {showVedicHint && (
               <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="text-xs text-secondary mt-2 bg-secondary/10 rounded-lg p-2">
