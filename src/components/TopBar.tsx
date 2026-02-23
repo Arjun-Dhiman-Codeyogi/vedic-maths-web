@@ -3,11 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Globe, Flame, Home, BookOpen, Brain, Calculator, Camera, Video, User, LogIn, LogOut, Menu, X } from 'lucide-react';
+import { Globe, Flame, BookOpen, Brain, Calculator, Camera, Video, User, LogIn, LogOut, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const navItems = [
-  { path: '/', icon: Home, labelEn: 'Home', labelHi: 'होम' },
   { path: '/learn', icon: BookOpen, labelEn: 'Learn', labelHi: 'सीखें' },
   { path: '/practice', icon: Brain, labelEn: 'Practice', labelHi: 'अभ्यास' },
   { path: '/abacus', icon: Calculator, labelEn: 'Abacus', labelHi: 'अबेकस' },
@@ -39,7 +38,7 @@ const TopBar = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border">
-      <div className="flex items-center justify-between px-4 h-14">
+      <div className="max-w-5xl mx-auto flex items-center justify-between px-4 h-14">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
