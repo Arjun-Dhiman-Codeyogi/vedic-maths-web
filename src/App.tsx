@@ -13,6 +13,7 @@ import AbacusPage from "./pages/AbacusPage";
 import SolverPage from "./pages/SolverPage";
 import ProfilePage from "./pages/ProfilePage";
 import VideosPage from "./pages/VideosPage";
+import AboutPage from "./pages/AboutPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +36,7 @@ const App = () => (
                 <Route path="/solver" element={<SolverPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/videos" element={<VideosPage />} />
+                <Route path="/about" element={<AboutPage />} />
               </Route>
               <Route path="/auth" element={<AuthPage />} />
               <Route path="*" element={<NotFound />} />

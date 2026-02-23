@@ -43,6 +43,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><Link to="/videos" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"><Video className="w-3 h-3" />{t('Video Lessons', 'वीडियो पाठ')}</Link></li>
               <li><Link to="/learn" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"><BookOpen className="w-3 h-3" />{t('Vedic Sutras', 'वैदिक सूत्र')}</Link></li>
+              <li><Link to="/about" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"><BookOpen className="w-3 h-3" />{t('About Us', 'हमारे बारे में')}</Link></li>
             </ul>
           </div>
 
