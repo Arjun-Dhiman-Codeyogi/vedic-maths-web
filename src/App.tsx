@@ -12,6 +12,8 @@ import PracticePage from "./pages/PracticePage";
 import AbacusPage from "./pages/AbacusPage";
 import SolverPage from "./pages/SolverPage";
 import ProfilePage from "./pages/ProfilePage";
+import VideosPage from "./pages/VideosPage";
+import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,7 +34,9 @@ const App = () => (
                 <Route path="/abacus" element={<AbacusPage />} />
                 <Route path="/solver" element={<SolverPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/videos" element={<VideosPage />} />
               </Route>
+              <Route path="/auth" element={<AuthPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
