@@ -240,15 +240,22 @@ const topicToOp = (topic: string | null, category: PracticeCategory): Operation 
 
 const PracticePage = () => {
   const { t } = useLanguage();
-  const { addXP, updateAccuracy } = useGame();
+  const { addXP, updateAccuracy, student } = useGame();
   const [searchParams] = useSearchParams();
   const topicParam = searchParams.get('topic');
 
+  // Auto-set difficulty based on class grade
+  const getDefaultDifficulty = (): Difficulty => {
+    if (student.classGrade <= 3) return 'easy';
+    if (student.classGrade <= 6) return 'medium';
+    return 'hard';
+  };
+
   const initialCategory = topicToCategory(topicParam);
   const [category, setCategory] = useState<PracticeCategory>(initialCategory);
-  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
+  const [difficulty, setDifficulty] = useState<Difficulty>(getDefaultDifficulty());
   const [operation, setOperation] = useState<Operation>(topicToOp(topicParam, initialCategory));
-  const [problem, setProblem] = useState<Problem>(generateProblem('easy', topicToOp(topicParam, initialCategory)));
+  const [problem, setProblem] = useState<Problem>(generateProblem(getDefaultDifficulty(), topicToOp(topicParam, initialCategory)));
   const [userAnswer, setUserAnswer] = useState('');
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null);
   const [score, setScore] = useState(0);
