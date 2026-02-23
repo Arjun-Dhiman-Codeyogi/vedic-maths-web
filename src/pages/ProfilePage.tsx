@@ -1,13 +1,31 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
-import { User, Settings, Award, TrendingUp, Target, Zap, Brain, BookOpen, ChevronRight, BarChart3 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { User, TrendingUp, Target, Zap, Brain, BarChart3, Globe, Flame, LogIn, LogOut } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const ProfilePage = () => {
-  const { t } = useLanguage();
+  const { lang, toggleLang, t } = useLanguage();
   const { student } = useGame();
+  const navigate = useNavigate();
   const xpPercent = Math.round((student.xp / student.xpToNext) * 100);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
 
   const weeklyData = [
     { day: 'Mon', problems: 25, accuracy: 80 },
@@ -33,7 +51,39 @@ const ProfilePage = () => {
   ];
 
   return (
-    <div className="px-4 py-4 space-y-5">
+    <div className="px-4 py-4 space-y-5 max-w-5xl mx-auto">
+      {/* Quick Settings Bar */}
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between bg-card rounded-xl p-3 shadow-card border border-border"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 bg-muted px-2.5 py-1.5 rounded-full">
+            <Flame className="w-4 h-4 text-streak animate-fire-flicker" />
+            <span className="text-xs font-bold">{student.streak}</span>
+          </div>
+          <div className="flex items-center gap-1 bg-muted px-2.5 py-1.5 rounded-full">
+            <span className="text-xs">⚡</span>
+            <span className="text-xs font-bold">{student.xp} XP</span>
+          </div>
+          <button onClick={toggleLang} className="flex items-center gap-1 bg-muted px-2.5 py-1.5 rounded-full hover:bg-accent/20 transition-colors">
+            <Globe className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-xs font-bold">{lang === 'en' ? 'हि' : 'EN'}</span>
+          </button>
+        </div>
+
+        {user ? (
+          <button onClick={handleLogout} className="flex items-center gap-1.5 bg-destructive/10 text-destructive px-3 py-1.5 rounded-full hover:bg-destructive/20 transition-colors">
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="text-xs font-bold">{t('Logout', 'लॉगआउट')}</span>
+          </button>
+        ) : (
+          <button onClick={() => navigate('/auth')} className="flex items-center gap-1.5 gradient-primary text-primary-foreground px-3 py-1.5 rounded-full shadow-warm">
+            <LogIn className="w-3.5 h-3.5" />
+            <span className="text-xs font-bold">{t('Login', 'लॉगिन')}</span>
+          </button>
+        )}
+      </motion.div>
+
       {/* Profile Header */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         className="gradient-hero rounded-2xl p-5 text-primary-foreground text-center relative overflow-hidden"
