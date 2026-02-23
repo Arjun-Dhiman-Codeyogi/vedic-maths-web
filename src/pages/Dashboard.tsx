@@ -122,25 +122,43 @@ const Dashboard = () => {
       </motion.div>
 
       {/* Recent Badges */}
-      <div>
-        <h3 className="font-display font-bold text-base mb-3">{t('Your Badges', 'आपके बैज')}</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {student.badges.map((badge, i) => (
-            <motion.div
-              key={badge}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6 + i * 0.1 }}
-              className="bg-card rounded-2xl p-4 shadow-card border border-border text-center"
-            >
-              <div className="w-14 h-14 mx-auto rounded-xl gradient-primary flex items-center justify-center mb-2">
-                <span className="text-3xl">{badge.split(' ')[0]}</span>
-              </div>
-              <p className="text-xs font-bold font-display">{badge.split(' ').slice(1).join(' ')}</p>
-            </motion.div>
-          ))}
+      {student.badges.length > 0 && (
+        <div>
+          <h3 className="font-display font-bold text-base mb-3">{t('Your Badges', 'आपके बैज')}</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {student.badges.map((badge, i) => (
+              <motion.div
+                key={badge}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 + i * 0.1 }}
+                className="bg-card rounded-2xl p-4 shadow-card border border-border text-center"
+              >
+                <div className="w-14 h-14 mx-auto rounded-xl gradient-primary flex items-center justify-center mb-2">
+                  <span className="text-3xl">{badge.split(' ')[0]}</span>
+                </div>
+                <p className="text-xs font-bold font-display">{badge.split(' ').slice(1).join(' ')}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Earn Badges Prompt (when no badges) */}
+      {student.badges.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-card rounded-xl p-4 shadow-card border border-border text-center"
+        >
+          <Trophy className="w-10 h-10 mx-auto mb-2 text-xp" />
+          <h3 className="font-display font-bold text-sm">{t('Earn Your First Badge!', 'अपना पहला बैज कमाएं!')}</h3>
+          <p className="text-xs text-muted-foreground mt-1">{t('Start practicing to unlock badges', 'बैज अनलॉक करने के लिए अभ्यास शुरू करें')}</p>
+          <Link to="/practice" className="inline-flex items-center gap-1 mt-3 gradient-primary text-primary-foreground px-4 py-2 rounded-full text-xs font-bold shadow-warm">
+            {t('Start Practice', 'अभ्यास शुरू करें')} <ArrowRight className="w-3 h-3" />
+          </Link>
+        </motion.div>
+      )}
     </div>
   );
 };
