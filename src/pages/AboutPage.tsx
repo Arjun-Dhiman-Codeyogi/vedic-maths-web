@@ -168,13 +168,13 @@ const AboutPage = () => {
           <div className="w-28 h-28 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-elevated shrink-0">
             <img src={arjunPhoto} alt="Arjun Dhiman" className="w-full h-full object-cover" />
           </div>
-          <div className="text-center sm:text-left">
+           <div className="text-center sm:text-left">
             <h3 className="font-display font-bold text-lg">{t('Arjun Dhiman', 'अर्जुन धीमान')}</h3>
             <p className="text-sm text-primary font-semibold">{t('Founder & Developer', 'संस्थापक और डेवलपर')}</p>
             <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
               {t(
-                'Passionate about making mathematics accessible and enjoyable for every student through technology. Built MathGenius to bridge the gap between ancient Vedic wisdom and modern learning.',
-                'प्रौद्योगिकी के माध्यम से हर छात्र के लिए गणित को सुलभ और आनंददायक बनाने के प्रति उत्साही। प्राचीन वैदिक ज्ञान और आधुनिक शिक्षा के बीच की खाई को पाटने के लिए MathGenius बनाया।'
+                'Arjun Dhiman is 18 years old and currently pursuing BCA from HSR College under Maa Shakumbari University. Son of Mr. Deepak Kumar, he is passionate about making mathematics accessible and enjoyable for every student through technology. Built MathGenius to bridge the gap between ancient Vedic wisdom and modern learning.',
+                'अर्जुन धीमान 18 साल के हैं और वर्तमान में माँ शाकुम्भरी विश्वविद्यालय के अंतर्गत HSR कॉलेज से BCA कर रहे हैं। श्री दीपक कुमार के पुत्र, वे प्रौद्योगिकी के माध्यम से हर छात्र के लिए गणित को सुलभ और आनंददायक बनाने के प्रति उत्साही हैं। प्राचीन वैदिक ज्ञान और आधुनिक शिक्षा के बीच की खाई को पाटने के लिए MathGenius बनाया।'
               )}
             </p>
             <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
