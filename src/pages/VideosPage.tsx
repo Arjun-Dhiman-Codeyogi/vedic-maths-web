@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Play, Plus, Minus, X as TimesIcon, Divide, BookOpen, Brain, Sparkles } from 'lucide-react';
+import { Play, Plus, Minus, X as TimesIcon, Divide, BookOpen, Brain, Sparkles, ArrowLeft } from 'lucide-react';
+
+interface VideoItem {
+  titleEn: string;
+  titleHi: string;
+  durationEn: string;
+  durationHi: string;
+  youtubeId: string;
+}
 
 interface VideoTopic {
   id: string;
@@ -11,7 +19,7 @@ interface VideoTopic {
   descHi: string;
   icon: any;
   color: string;
-  subtopics: { titleEn: string; titleHi: string; durationEn: string; durationHi: string }[];
+  subtopics: VideoItem[];
 }
 
 const videoTopics: VideoTopic[] = [
@@ -24,9 +32,9 @@ const videoTopics: VideoTopic[] = [
     icon: Plus,
     color: 'from-primary to-secondary',
     subtopics: [
-      { titleEn: 'Adding numbers near 10, 100, 1000', titleHi: '10, 100, 1000 के पास की संख्याएं जोड़ना', durationEn: '5 min', durationHi: '5 मिनट' },
-      { titleEn: 'Ekadhikena Purvena - By one more', titleHi: 'एकाधिकेन पूर्वेण - एक और अधिक', durationEn: '7 min', durationHi: '7 मिनट' },
-      { titleEn: 'Speed addition of long columns', titleHi: 'लंबी कॉलम की तेज़ जोड़', durationEn: '6 min', durationHi: '6 मिनट' },
+      { titleEn: 'Vedic Maths Addition & Subtraction Tricks', titleHi: 'वैदिक गणित जोड़ और घटाव ट्रिक्स', durationEn: '15 min', durationHi: '15 मिनट', youtubeId: 'hdHTp0sQFXg' },
+      { titleEn: 'Addition Tricks for Fast Calculation', titleHi: 'तेज गणना के लिए जोड़ ट्रिक्स', durationEn: '12 min', durationHi: '12 मिनट', youtubeId: 'hCg_xZgUkmw' },
+      { titleEn: 'Speed Calculation - All Exams', titleHi: 'गति गणना - सभी परीक्षाएं', durationEn: '20 min', durationHi: '20 मिनट', youtubeId: 'WFSmHbf7f88' },
     ],
   },
   {
@@ -38,9 +46,9 @@ const videoTopics: VideoTopic[] = [
     icon: Minus,
     color: 'from-secondary to-accent',
     subtopics: [
-      { titleEn: 'Nikhilam - All from 9, last from 10', titleHi: 'निखिलम - सब 9 से, आखिरी 10 से', durationEn: '6 min', durationHi: '6 मिनट' },
-      { titleEn: 'Subtraction from base numbers', titleHi: 'आधार संख्याओं से घटाव', durationEn: '5 min', durationHi: '5 मिनट' },
-      { titleEn: 'Complement method tricks', titleHi: 'पूरक विधि तरकीबें', durationEn: '7 min', durationHi: '7 मिनट' },
+      { titleEn: 'Subtraction Made Easy - Vedic Maths', titleHi: 'घटाव आसान बनाएं - वैदिक गणित', durationEn: '10 min', durationHi: '10 मिनट', youtubeId: '5XG7WETxBeM' },
+      { titleEn: 'Nikhilam Subtraction Method', titleHi: 'निखिलम घटाव विधि', durationEn: '8 min', durationHi: '8 मिनट', youtubeId: 'dyQx1sHqaJE' },
+      { titleEn: 'Fast Subtraction Tricks', titleHi: 'तेज घटाव ट्रिक्स', durationEn: '12 min', durationHi: '12 मिनट', youtubeId: 'grkWGeqW99c' },
     ],
   },
   {
@@ -52,10 +60,10 @@ const videoTopics: VideoTopic[] = [
     icon: TimesIcon,
     color: 'from-accent to-primary',
     subtopics: [
-      { titleEn: 'Multiply by 11, 99, 101 instantly', titleHi: '11, 99, 101 से तुरंत गुणा', durationEn: '5 min', durationHi: '5 मिनट' },
-      { titleEn: 'Urdhva Tiryagbhyam (Cross multiply)', titleHi: 'ऊर्ध्व तिर्यग्भ्याम (क्रॉस गुणा)', durationEn: '8 min', durationHi: '8 मिनट' },
-      { titleEn: 'Squaring numbers near 50, 100', titleHi: '50, 100 के पास की संख्याओं का वर्ग', durationEn: '6 min', durationHi: '6 मिनट' },
-      { titleEn: 'Nikhilam for multiplication', titleHi: 'गुणा के लिए निखिलम', durationEn: '7 min', durationHi: '7 मिनट' },
+      { titleEn: '2-Digit Multiplication Trick', titleHi: '2 अंकों की गुणा ट्रिक', durationEn: '8 min', durationHi: '8 मिनट', youtubeId: 'J1N64sosuoY' },
+      { titleEn: 'Speed Calculation Tricks', titleHi: 'गति गणना ट्रिक्स', durationEn: '15 min', durationHi: '15 मिनट', youtubeId: 'C6z8yjZRV3o' },
+      { titleEn: 'Squaring Numbers 1-100 in 3 Seconds', titleHi: '1-100 का वर्ग 3 सेकंड में', durationEn: '12 min', durationHi: '12 मिनट', youtubeId: 'Ko5Dl_QGj0g' },
+      { titleEn: 'Vedic Math Multiplication Secrets', titleHi: 'वैदिक गणित गुणा रहस्य', durationEn: '10 min', durationHi: '10 मिनट', youtubeId: '-z7aHP72kCM' },
     ],
   },
   {
@@ -67,9 +75,10 @@ const videoTopics: VideoTopic[] = [
     icon: Divide,
     color: 'from-primary to-accent',
     subtopics: [
-      { titleEn: 'Division by 9 and its multiples', titleHi: '9 और उसके गुणकों से भाग', durationEn: '5 min', durationHi: '5 मिनट' },
-      { titleEn: 'Paravartya Yojayet method', titleHi: 'परावर्त्य योजयेत विधि', durationEn: '8 min', durationHi: '8 मिनट' },
-      { titleEn: 'Flag division for large numbers', titleHi: 'बड़ी संख्याओं के लिए ध्वज भाग', durationEn: '9 min', durationHi: '9 मिनट' },
+      { titleEn: 'Divide Any Number in 5 Seconds', titleHi: 'किसी भी संख्या को 5 सेकंड में भाग दें', durationEn: '10 min', durationHi: '10 मिनट', youtubeId: 'RRaU9Iv3yAc' },
+      { titleEn: 'Big Numbers Division Trick', titleHi: 'बड़ी संख्या भाग ट्रिक', durationEn: '8 min', durationHi: '8 मिनट', youtubeId: 'g9Z58h2yGWQ' },
+      { titleEn: 'Division by 9, 99, 999 in Vedic Math', titleHi: 'वैदिक गणित में 9, 99, 999 से भाग', durationEn: '7 min', durationHi: '7 मिनट', youtubeId: 'IDvQvHDp8z4' },
+      { titleEn: 'Long Division - Fast Vedic Method', titleHi: 'लंबा भाग - तेज वैदिक विधि', durationEn: '12 min', durationHi: '12 मिनट', youtubeId: '7cBRXayBNr4' },
     ],
   },
 ];
@@ -77,6 +86,31 @@ const videoTopics: VideoTopic[] = [
 const VideosPage = () => {
   const { t } = useLanguage();
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<VideoItem | null>(null);
+
+  if (playingVideo) {
+    return (
+      <div className="px-4 py-4 md:py-8 space-y-4 max-w-4xl mx-auto">
+        <button
+          onClick={() => setPlayingVideo(null)}
+          className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" /> {t('Back to Videos', 'वीडियो पर वापस')}
+        </button>
+        <h2 className="font-display font-bold text-lg">{t(playingVideo.titleEn, playingVideo.titleHi)}</h2>
+        <div className="aspect-video rounded-2xl overflow-hidden bg-black shadow-elevated">
+          <iframe
+            src={`https://www.youtube.com/embed/${playingVideo.youtubeId}?autoplay=1&rel=0`}
+            title={playingVideo.titleEn}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+        <p className="text-sm text-muted-foreground">{t(playingVideo.durationEn, playingVideo.durationHi)}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 py-4 md:py-8 space-y-5 max-w-4xl mx-auto">
@@ -101,7 +135,7 @@ const VideosPage = () => {
         <Brain className="w-10 h-10 mb-2 opacity-90" />
         <h3 className="font-display font-bold text-lg">{t('Ancient Wisdom, Modern Speed', 'प्राचीन ज्ञान, आधुनिक गति')}</h3>
         <p className="text-sm opacity-80 mt-1">
-          {t('4 categories • 13 video lessons • Vedic Sutras explained', '4 श्रेणियां • 13 वीडियो पाठ • वैदिक सूत्र समझाए गए')}
+          {t('4 categories • 14 video lessons • Real YouTube tutorials', '4 श्रेणियां • 14 वीडियो पाठ • असली YouTube ट्यूटोरियल')}
         </p>
       </motion.div>
 
@@ -141,18 +175,27 @@ const VideosPage = () => {
                 className="border-t border-border"
               >
                 {topic.subtopics.map((sub, j) => (
-                  <div
+                  <button
                     key={j}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0"
+                    onClick={() => setPlayingVideo(sub)}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0 text-left"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                      <Play className="w-4 h-4 text-primary" />
+                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 relative overflow-hidden">
+                      <img
+                        src={`https://img.youtube.com/vi/${sub.youtubeId}/mqdefault.jpg`}
+                        alt=""
+                        className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                      />
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-lg">
+                        <Play className="w-4 h-4 text-white fill-white" />
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold">{t(sub.titleEn, sub.titleHi)}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate">{t(sub.titleEn, sub.titleHi)}</p>
                       <p className="text-[10px] text-muted-foreground">{t(sub.durationEn, sub.durationHi)}</p>
                     </div>
-                  </div>
+                    <Play className="w-4 h-4 text-primary flex-shrink-0" />
+                  </button>
                 ))}
               </motion.div>
             )}
