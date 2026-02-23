@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Link } from 'react-router-dom';
-import { Lock, CheckCircle2, ChevronRight, BookOpen, Play, ArrowRight } from 'lucide-react';
+import { Lock, CheckCircle2, ChevronRight, BookOpen, Play, ArrowRight, ScrollText } from 'lucide-react';
 import { useState } from 'react';
 
 interface Topic {
@@ -101,6 +101,18 @@ const LearnPage = () => {
           {t('Start Now', 'अभी शुरू करें')} <ArrowRight className="w-3 h-3" />
         </Link>
       </motion.div>
+
+      {/* Vedic Sutras Link */}
+      <Link to="/sutras" className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-card border border-border hover:shadow-elevated hover:scale-[1.01] transition-all">
+        <div className="w-12 h-12 rounded-xl gradient-hero flex items-center justify-center flex-shrink-0">
+          <ScrollText className="w-6 h-6 text-primary-foreground" />
+        </div>
+        <div className="flex-1">
+          <h4 className="font-display font-bold text-sm">{t('16 Vedic Sutras', '16 वैदिक सूत्र')}</h4>
+          <p className="text-xs text-muted-foreground">{t('Explore all ancient math formulas with examples', 'सभी प्राचीन गणित सूत्र उदाहरण सहित देखें')}</p>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+      </Link>
 
       {/* Topics List */}
       <div className="space-y-3">
