@@ -79,7 +79,7 @@ const VideosPage = () => {
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
 
   return (
-    <div className="px-4 py-4 space-y-5">
+    <div className="px-4 py-4 md:py-8 space-y-5 max-w-4xl mx-auto">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">

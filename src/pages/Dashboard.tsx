@@ -25,7 +25,7 @@ const Dashboard = () => {
   const xpPercent = Math.round((student.xp / student.xpToNext) * 100);
 
   return (
-    <div className="px-4 py-4 space-y-5">
+    <div className="px-4 py-4 md:py-8 space-y-5 max-w-4xl mx-auto">
       {/* Hero Welcome Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -57,7 +57,7 @@ const Dashboard = () => {
       {/* Quick Actions */}
       <div>
         <h3 className="font-display font-bold text-base mb-3">{t('Quick Start', 'तुरंत शुरू करें')}</h3>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {quickActions.map((action, i) => (
             <motion.div
               key={action.path}

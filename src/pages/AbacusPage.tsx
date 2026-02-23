@@ -53,7 +53,7 @@ const AbacusPage = () => {
   const reset = () => setBeads(initBeads());
 
   return (
-    <div className="px-4 py-4 space-y-4">
+    <div className="px-4 py-4 md:py-8 space-y-4 max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-display font-bold text-xl">{t('Virtual Abacus', 'वर्चुअल अबेकस')}</h2>
