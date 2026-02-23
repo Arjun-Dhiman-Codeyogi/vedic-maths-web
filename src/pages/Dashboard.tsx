@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { Link } from 'react-router-dom';
-import { BookOpen, Brain, Calculator, Camera, Trophy, TrendingUp, Target, Zap, Star, ArrowRight } from 'lucide-react';
+import { BookOpen, Brain, Calculator, Camera, Trophy, TrendingUp, Target, Zap, Star, ArrowRight, Calendar } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const quickActions = [
@@ -12,16 +12,11 @@ const quickActions = [
   { icon: Camera, label: 'Photo Solve', labelHi: 'फोटो हल', path: '/solver', color: 'from-primary to-accent' },
 ];
 
-const dailyStats = [
-  { icon: Target, label: 'Accuracy', value: '78%', color: 'text-level' },
-  { icon: Zap, label: 'Speed', value: '4.2s', color: 'text-secondary' },
-  { icon: TrendingUp, label: 'Improved', value: '+12%', color: 'text-primary' },
-  { icon: Trophy, label: 'Rank', value: '#15', color: 'text-xp' },
-];
+
 
 const Dashboard = () => {
   const { t } = useLanguage();
-  const { student } = useGame();
+  const { student, daysCount } = useGame();
   const xpPercent = Math.round((student.xp / student.xpToNext) * 100);
 
   return (
@@ -79,9 +74,14 @@ const Dashboard = () => {
 
       {/* Daily Stats */}
       <div>
-        <h3 className="font-display font-bold text-base mb-3">{t("Today's Stats", 'आज के आंकड़े')}</h3>
+        <h3 className="font-display font-bold text-base mb-3">{t("Your Stats", 'आपके आंकड़े')}</h3>
         <div className="grid grid-cols-4 gap-2">
-          {dailyStats.map((stat, i) => (
+          {[
+            { icon: Target, label: t('Accuracy', 'सटीकता'), value: `${student.accuracy}%`, color: 'text-level' },
+            { icon: Zap, label: t('Streak', 'स्ट्रीक'), value: `${student.streak}🔥`, color: 'text-secondary' },
+            { icon: TrendingUp, label: t('Problems', 'सवाल'), value: `${student.totalProblems}`, color: 'text-primary' },
+            { icon: Calendar, label: t('Days', 'दिन'), value: `${daysCount}`, color: 'text-xp' },
+          ].map((stat, i) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 10 }}

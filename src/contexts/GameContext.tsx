@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface StudentData {
@@ -11,6 +11,8 @@ interface StudentData {
   accuracy: number;
   badges: string[];
   classGrade: number;
+  joinedAt: string | null;
+  lastActiveAt: string | null;
 }
 
 interface GameContextType {
@@ -20,18 +22,21 @@ interface GameContextType {
   resetStreak: () => void;
   addBadge: (badge: string) => void;
   updateAccuracy: (correct: boolean) => void;
+  daysCount: number;
 }
 
 const defaultStudent: StudentData = {
   name: 'Student',
-  level: 3,
-  xp: 450,
-  xpToNext: 600,
-  streak: 7,
-  totalProblems: 234,
-  accuracy: 78,
-  badges: ['🌟 First Step', '🔥 Week Warrior', '🧮 Abacus Beginner', '⚡ Speed Solver'],
+  level: 1,
+  xp: 0,
+  xpToNext: 200,
+  streak: 0,
+  totalProblems: 0,
+  accuracy: 0,
+  badges: [],
   classGrade: 6,
+  joinedAt: null,
+  lastActiveAt: null,
 };
 
 const GameContext = createContext<GameContextType>({
@@ -41,31 +46,90 @@ const GameContext = createContext<GameContextType>({
   resetStreak: () => {},
   addBadge: () => {},
   updateAccuracy: () => {},
+  daysCount: 0,
 });
 
 export const useGame = () => useContext(GameContext);
 
+const calcDays = (joinedAt: string | null) => {
+  if (!joinedAt) return 0;
+  const diff = Date.now() - new Date(joinedAt).getTime();
+  return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+};
+
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [student, setStudent] = useState<StudentData>(defaultStudent);
+  const [userId, setUserId] = useState<string | null>(null);
+  const saveTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Load progress from DB
+  const loadProgress = async (uid: string) => {
+    const { data } = await supabase
+      .from('student_progress')
+      .select('*')
+      .eq('user_id', uid)
+      .single();
+
+    if (data) {
+      setStudent(prev => ({
+        ...prev,
+        level: data.level,
+        xp: data.xp,
+        xpToNext: data.xp_to_next,
+        streak: data.streak,
+        totalProblems: data.total_problems,
+        accuracy: data.accuracy,
+        badges: data.badges || [],
+        classGrade: data.class_grade,
+        joinedAt: data.joined_at,
+        lastActiveAt: data.last_active_at,
+      }));
+    }
+  };
+
+  // Save progress to DB (debounced)
+  const saveProgress = (data: StudentData) => {
+    if (!userId) return;
+    if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(async () => {
+      await supabase
+        .from('student_progress')
+        .update({
+          level: data.level,
+          xp: data.xp,
+          xp_to_next: data.xpToNext,
+          streak: data.streak,
+          total_problems: data.totalProblems,
+          accuracy: data.accuracy,
+          badges: data.badges,
+          class_grade: data.classGrade,
+          last_active_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId);
+    }, 1000);
+  };
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         const displayName = session.user.user_metadata?.display_name || 
-                           session.user.email?.split('@')[0] || 
-                           'Student';
+                           session.user.email?.split('@')[0] || 'Student';
+        setUserId(session.user.id);
         setStudent(prev => ({ ...prev, name: displayName }));
+        loadProgress(session.user.id);
       } else {
-        setStudent(prev => ({ ...prev, name: 'Student' }));
+        setUserId(null);
+        setStudent({ ...defaultStudent });
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         const displayName = session.user.user_metadata?.display_name || 
-                           session.user.email?.split('@')[0] || 
-                           'Student';
+                           session.user.email?.split('@')[0] || 'Student';
+        setUserId(session.user.id);
         setStudent(prev => ({ ...prev, name: displayName }));
+        loadProgress(session.user.id);
       }
     });
 
@@ -82,23 +146,51 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         newLevel++;
         newXPToNext = Math.floor(newXPToNext * 1.3);
       }
-      return { ...prev, xp: newXP, level: newLevel, xpToNext: newXPToNext };
+      const updated = { ...prev, xp: newXP, level: newLevel, xpToNext: newXPToNext };
+      saveProgress(updated);
+      return updated;
     });
   };
 
-  const incrementStreak = () => setStudent(prev => ({ ...prev, streak: prev.streak + 1 }));
-  const resetStreak = () => setStudent(prev => ({ ...prev, streak: 0 }));
-  const addBadge = (badge: string) => setStudent(prev => ({ ...prev, badges: [...prev.badges, badge] }));
+  const incrementStreak = () => {
+    setStudent(prev => {
+      const updated = { ...prev, streak: prev.streak + 1 };
+      saveProgress(updated);
+      return updated;
+    });
+  };
+
+  const resetStreak = () => {
+    setStudent(prev => {
+      const updated = { ...prev, streak: 0 };
+      saveProgress(updated);
+      return updated;
+    });
+  };
+
+  const addBadge = (badge: string) => {
+    setStudent(prev => {
+      if (prev.badges.includes(badge)) return prev;
+      const updated = { ...prev, badges: [...prev.badges, badge] };
+      saveProgress(updated);
+      return updated;
+    });
+  };
+
   const updateAccuracy = (correct: boolean) => {
     setStudent(prev => {
       const total = prev.totalProblems + 1;
       const correctCount = Math.round(prev.accuracy * prev.totalProblems / 100) + (correct ? 1 : 0);
-      return { ...prev, totalProblems: total, accuracy: Math.round(correctCount / total * 100) };
+      const updated = { ...prev, totalProblems: total, accuracy: total > 0 ? Math.round(correctCount / total * 100) : 0 };
+      saveProgress(updated);
+      return updated;
     });
   };
 
+  const daysCount = calcDays(student.joinedAt);
+
   return (
-    <GameContext.Provider value={{ student, addXP, incrementStreak, resetStreak, addBadge, updateAccuracy }}>
+    <GameContext.Provider value={{ student, addXP, incrementStreak, resetStreak, addBadge, updateAccuracy, daysCount }}>
       {children}
     </GameContext.Provider>
   );

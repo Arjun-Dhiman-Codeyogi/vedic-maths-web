@@ -4,12 +4,12 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { supabase } from '@/integrations/supabase/client';
-import { User, TrendingUp, Target, Zap, Brain, BarChart3, Globe, Flame, LogIn, LogOut } from 'lucide-react';
+import { User, TrendingUp, Target, Zap, Brain, BarChart3, Globe, Flame, LogIn, LogOut, Calendar } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const ProfilePage = () => {
   const { lang, toggleLang, t } = useLanguage();
-  const { student } = useGame();
+  const { student, daysCount } = useGame();
   const navigate = useNavigate();
   const xpPercent = Math.round((student.xp / student.xpToNext) * 100);
   const [user, setUser] = useState<any>(null);
@@ -106,11 +106,12 @@ const ProfilePage = () => {
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {[
           { icon: Target, label: t('Accuracy', 'सटीकता'), value: `${student.accuracy}%`, color: 'text-level' },
           { icon: Brain, label: t('Problems', 'सवाल'), value: student.totalProblems.toString(), color: 'text-secondary' },
           { icon: Zap, label: t('Streak', 'स्ट्रीक'), value: `${student.streak}🔥`, color: 'text-streak' },
+          { icon: Calendar, label: t('Days', 'दिन'), value: `${daysCount}`, color: 'text-xp' },
         ].map(stat => (
           <div key={stat.label} className="bg-card rounded-xl p-3 shadow-card text-center border border-border">
             <stat.icon className={`w-5 h-5 mx-auto mb-1 ${stat.color}`} />

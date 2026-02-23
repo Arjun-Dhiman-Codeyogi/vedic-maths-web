@@ -44,6 +44,57 @@ export type Database = {
         }
         Relationships: []
       }
+      student_progress: {
+        Row: {
+          accuracy: number
+          badges: string[]
+          class_grade: number
+          created_at: string
+          id: string
+          joined_at: string
+          last_active_at: string
+          level: number
+          streak: number
+          total_problems: number
+          updated_at: string
+          user_id: string
+          xp: number
+          xp_to_next: number
+        }
+        Insert: {
+          accuracy?: number
+          badges?: string[]
+          class_grade?: number
+          created_at?: string
+          id?: string
+          joined_at?: string
+          last_active_at?: string
+          level?: number
+          streak?: number
+          total_problems?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+          xp_to_next?: number
+        }
+        Update: {
+          accuracy?: number
+          badges?: string[]
+          class_grade?: number
+          created_at?: string
+          id?: string
+          joined_at?: string
+          last_active_at?: string
+          level?: number
+          streak?: number
+          total_problems?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+          xp_to_next?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
