@@ -17,17 +17,38 @@ interface Topic {
   lessons: number;
 }
 
-const topics: Topic[] = [
-  { id: 'add', titleEn: 'Vedic Addition', titleHi: 'वैदिक जोड़', descEn: 'Master lightning-fast addition with Vedic Sutras', descHi: 'वैदिक सूत्रों से तेज जोड़ सीखें', sutra: 'Ekadhikena Purvena', icon: '➕', progress: 85, locked: false, lessons: 8 },
-  { id: 'sub', titleEn: 'Vedic Subtraction', titleHi: 'वैदिक घटाव', descEn: 'Nikhilam method for instant subtraction', descHi: 'निखिलम विधि से तुरंत घटाव', sutra: 'Nikhilam Sutra', icon: '➖', progress: 60, locked: false, lessons: 6 },
-  { id: 'mul', titleEn: 'Multiplication Tricks', titleHi: 'गुणा की ट्रिक्स', descEn: 'Urdhva Tiryagbhyam & cross multiplication', descHi: 'ऊर्ध्व तिर्यग्भ्याम और क्रॉस गुणा', sutra: 'Urdhva Tiryagbhyam', icon: '✖️', progress: 40, locked: false, lessons: 12 },
-  { id: 'div', titleEn: 'Division Mastery', titleHi: 'भाग में महारत', descEn: 'Paravartya Yojayet for fast division', descHi: 'परावर्त्य योजयेत से तेज भाग', sutra: 'Paravartya Yojayet', icon: '➗', progress: 20, locked: false, lessons: 8 },
-  { id: 'sq', titleEn: 'Squares & Cubes', titleHi: 'वर्ग और घन', descEn: 'Yavadunam sutra for perfect squares', descHi: 'यावदूनम सूत्र से पूर्ण वर्ग', sutra: 'Yavadunam', icon: '²', progress: 0, locked: false, lessons: 10 },
-  { id: 'sqrt', titleEn: 'Square & Cube Roots', titleHi: 'वर्गमूल और घनमूल', descEn: 'Find roots instantly with Vedic methods', descHi: 'वैदिक विधियों से तुरंत मूल ज्ञात करें', icon: '√', progress: 0, locked: true, lessons: 8 },
-  { id: 'dec', titleEn: 'Decimal Operations', titleHi: 'दशमलव संक्रियाएं', descEn: 'Vedic tricks for decimal calculations', descHi: 'दशमलव गणना की वैदिक ट्रिक्स', icon: '🔢', progress: 0, locked: true, lessons: 6 },
-  { id: 'pct', titleEn: 'Percentages', titleHi: 'प्रतिशत', descEn: 'Calculate percentages in seconds', descHi: 'सेकंडों में प्रतिशत निकालें', icon: '%', progress: 0, locked: true, lessons: 5 },
-  { id: 'alg', titleEn: 'Algebraic Tricks', titleHi: 'बीजगणित ट्रिक्स', descEn: 'Solve algebra with Vedic shortcuts', descHi: 'वैदिक शॉर्टकट से बीजगणित हल करें', icon: '𝑥', progress: 0, locked: true, lessons: 10 },
-];
+const topicsByCategory: Record<string, Topic[]> = {
+  vedic: [
+    { id: 'add', titleEn: 'Vedic Addition', titleHi: 'वैदिक जोड़', descEn: 'Master lightning-fast addition with Vedic Sutras', descHi: 'वैदिक सूत्रों से तेज जोड़ सीखें', sutra: 'Ekadhikena Purvena', icon: '➕', progress: 85, locked: false, lessons: 8 },
+    { id: 'sub', titleEn: 'Vedic Subtraction', titleHi: 'वैदिक घटाव', descEn: 'Nikhilam method for instant subtraction', descHi: 'निखिलम विधि से तुरंत घटाव', sutra: 'Nikhilam Sutra', icon: '➖', progress: 60, locked: false, lessons: 6 },
+    { id: 'mul', titleEn: 'Multiplication Tricks', titleHi: 'गुणा की ट्रिक्स', descEn: 'Urdhva Tiryagbhyam & cross multiplication', descHi: 'ऊर्ध्व तिर्यग्भ्याम और क्रॉस गुणा', sutra: 'Urdhva Tiryagbhyam', icon: '✖️', progress: 40, locked: false, lessons: 12 },
+    { id: 'div', titleEn: 'Division Mastery', titleHi: 'भाग में महारत', descEn: 'Paravartya Yojayet for fast division', descHi: 'परावर्त्य योजयेत से तेज भाग', sutra: 'Paravartya Yojayet', icon: '➗', progress: 20, locked: false, lessons: 8 },
+    { id: 'sq', titleEn: 'Squares & Cubes', titleHi: 'वर्ग और घन', descEn: 'Yavadunam sutra for perfect squares', descHi: 'यावदूनम सूत्र से पूर्ण वर्ग', sutra: 'Yavadunam', icon: '²', progress: 0, locked: false, lessons: 10 },
+    { id: 'sqrt', titleEn: 'Square & Cube Roots', titleHi: 'वर्गमूल और घनमूल', descEn: 'Find roots instantly with Vedic methods', descHi: 'वैदिक विधियों से तुरंत मूल ज्ञात करें', icon: '√', progress: 0, locked: true, lessons: 8 },
+    { id: 'dec', titleEn: 'Decimal Operations', titleHi: 'दशमलव संक्रियाएं', descEn: 'Vedic tricks for decimal calculations', descHi: 'दशमलव गणना की वैदिक ट्रिक्स', icon: '🔢', progress: 0, locked: true, lessons: 6 },
+    { id: 'pct', titleEn: 'Percentages', titleHi: 'प्रतिशत', descEn: 'Calculate percentages in seconds', descHi: 'सेकंडों में प्रतिशत निकालें', icon: '%', progress: 0, locked: true, lessons: 5 },
+    { id: 'alg', titleEn: 'Algebraic Tricks', titleHi: 'बीजगणित ट्रिक्स', descEn: 'Solve algebra with Vedic shortcuts', descHi: 'वैदिक शॉर्टकट से बीजगणित हल करें', icon: '𝑥', progress: 0, locked: true, lessons: 10 },
+  ],
+  finger: [
+    { id: 'f-count', titleEn: 'Finger Counting Basics', titleHi: 'उंगली गिनती मूल बातें', descEn: 'Learn to count 1-99 on your fingers', descHi: 'उंगलियों पर 1-99 गिनना सीखें', icon: '🖐️', progress: 70, locked: false, lessons: 5 },
+    { id: 'f-add', titleEn: 'Finger Addition', titleHi: 'उंगली जोड़', descEn: 'Add numbers quickly using finger positions', descHi: 'उंगली की स्थिति से तेज जोड़', icon: '👆', progress: 45, locked: false, lessons: 6 },
+    { id: 'f-sub', titleEn: 'Finger Subtraction', titleHi: 'उंगली घटाव', descEn: 'Subtract using complementary finger methods', descHi: 'पूरक उंगली विधि से घटाव', icon: '👇', progress: 20, locked: false, lessons: 5 },
+    { id: 'f-mul', titleEn: 'Finger Multiplication', titleHi: 'उंगली गुणा', descEn: 'Multiply 6-10 using finger tricks', descHi: '6-10 की गुणा उंगली ट्रिक्स से', icon: '✌️', progress: 10, locked: false, lessons: 8 },
+    { id: 'f-9table', titleEn: '9 Times Table Trick', titleHi: '9 का पहाड़ा ट्रिक', descEn: 'Master 9x table with one hand', descHi: 'एक हाथ से 9 का पहाड़ा', icon: '9️⃣', progress: 0, locked: false, lessons: 3 },
+    { id: 'f-chisanbop', titleEn: 'Chisanbop Method', titleHi: 'चिसनबॉप विधि', descEn: 'Korean finger math for fast calculations', descHi: 'तेज गणना के लिए कोरियन उंगली गणित', icon: '🤟', progress: 0, locked: true, lessons: 7 },
+    { id: 'f-advanced', titleEn: 'Advanced Finger Math', titleHi: 'उन्नत उंगली गणित', descEn: 'Two-hand techniques for complex operations', descHi: 'जटिल संक्रियाओं के लिए दो-हाथ तकनीक', icon: '🙌', progress: 0, locked: true, lessons: 6 },
+  ],
+  brain: [
+    { id: 'b-visual', titleEn: 'Visual Memory', titleHi: 'दृश्य स्मृति', descEn: 'Strengthen number visualization skills', descHi: 'संख्या दृश्य कौशल मजबूत करें', icon: '👁️', progress: 55, locked: false, lessons: 6 },
+    { id: 'b-speed', titleEn: 'Speed Processing', titleHi: 'गति प्रसंस्करण', descEn: 'Train your brain to process faster', descHi: 'मस्तिष्क को तेज प्रसंस्करण के लिए प्रशिक्षित करें', icon: '⚡', progress: 30, locked: false, lessons: 8 },
+    { id: 'b-pattern', titleEn: 'Pattern Recognition', titleHi: 'पैटर्न पहचान', descEn: 'Spot number patterns instantly', descHi: 'संख्या पैटर्न तुरंत पहचानें', icon: '🧩', progress: 15, locked: false, lessons: 7 },
+    { id: 'b-mental', titleEn: 'Mental Arithmetic', titleHi: 'मानसिक अंकगणित', descEn: 'Solve multi-step problems in your head', descHi: 'दिमाग में बहु-चरणीय समस्याएं हल करें', icon: '🧠', progress: 10, locked: false, lessons: 10 },
+    { id: 'b-focus', titleEn: 'Focus & Concentration', titleHi: 'ध्यान और एकाग्रता', descEn: 'Build laser focus for math problem solving', descHi: 'गणित समस्या समाधान के लिए तीव्र ध्यान बनाएं', icon: '🎯', progress: 0, locked: false, lessons: 5 },
+    { id: 'b-memory', titleEn: 'Number Memory Palace', titleHi: 'संख्या स्मृति महल', descEn: 'Memorize long numbers using palace technique', descHi: 'महल तकनीक से लंबी संख्याएं याद करें', icon: '🏰', progress: 0, locked: true, lessons: 6 },
+    { id: 'b-logic', titleEn: 'Logical Reasoning', titleHi: 'तार्किक तर्क', descEn: 'Develop mathematical reasoning skills', descHi: 'गणितीय तर्क कौशल विकसित करें', icon: '🔗', progress: 0, locked: true, lessons: 8 },
+    { id: 'b-creative', titleEn: 'Creative Problem Solving', titleHi: 'रचनात्मक समस्या समाधान', descEn: 'Think outside the box with math puzzles', descHi: 'गणित पहेलियों से अलग सोचें', icon: '💡', progress: 0, locked: true, lessons: 7 },
+  ],
+};
 
 const categories = [
   { id: 'vedic', labelEn: 'Vedic Math', labelHi: 'वैदिक गणित' },
@@ -83,7 +104,7 @@ const LearnPage = () => {
 
       {/* Topics List */}
       <div className="space-y-3">
-        {topics.map((topic, i) => (
+        {(topicsByCategory[activeCategory] || []).map((topic, i) => (
           <motion.div
             key={topic.id}
             initial={{ opacity: 0, x: -20 }}
