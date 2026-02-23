@@ -102,17 +102,34 @@ const LearnPage = () => {
         </Link>
       </motion.div>
 
-      {/* Vedic Sutras Link */}
-      <Link to="/sutras" className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-card border border-border hover:shadow-elevated hover:scale-[1.01] transition-all">
-        <div className="w-12 h-12 rounded-xl gradient-hero flex items-center justify-center flex-shrink-0">
-          <ScrollText className="w-6 h-6 text-primary-foreground" />
-        </div>
-        <div className="flex-1">
-          <h4 className="font-display font-bold text-sm">{t('16 Vedic Sutras', '16 वैदिक सूत्र')}</h4>
-          <p className="text-xs text-muted-foreground">{t('Explore all ancient math formulas with examples', 'सभी प्राचीन गणित सूत्र उदाहरण सहित देखें')}</p>
-        </div>
-        <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-      </Link>
+      {/* 📜 Vedic Sutras - Featured Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="relative overflow-hidden rounded-2xl border-2 border-accent/30 bg-gradient-to-br from-accent/10 via-card to-secondary/10 p-1"
+      >
+        <Link to="/sutras" className="block rounded-xl bg-card/80 backdrop-blur-sm p-5 hover:bg-card/60 transition-all group">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl gradient-hero flex items-center justify-center flex-shrink-0 shadow-warm group-hover:scale-110 transition-transform">
+              <ScrollText className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h4 className="font-display font-bold text-base">{t('📜 16 Vedic Sutras', '📜 16 वैदिक सूत्र')}</h4>
+                <span className="text-[10px] font-bold bg-accent/20 text-accent px-2 py-0.5 rounded-full">{t('MUST READ', 'जरूर पढ़ें')}</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {t(
+                  'Discover all 16 ancient Vedic Math formulas with detailed history, step-by-step examples & usage guide by Jagadguru Shankaracharya',
+                  'जगद्गुरु शंकराचार्य द्वारा रचित सभी 16 प्राचीन वैदिक गणित सूत्र — विस्तृत इतिहास, चरण-दर-चरण उदाहरण और उपयोग गाइड'
+                )}
+              </p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-accent flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+      </motion.div>
 
       {/* Topics List */}
       <div className="space-y-3">
