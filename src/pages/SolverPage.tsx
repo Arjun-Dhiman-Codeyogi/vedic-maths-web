@@ -1,37 +1,181 @@
-import { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Camera, Upload, Image as ImageIcon, Wand2, ArrowRight, Clock, Sparkles, X } from 'lucide-react';
+import { Camera, Upload, Wand2, Clock, X, Volume2, VolumeX, Send, Loader2, Sparkles, MessageCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import ReactMarkdown from 'react-markdown';
+
+type SolutionData = {
+  problem: string;
+  traditional: { steps: string[]; time: string; explanation_hi: string; explanation_en: string };
+  vedic: { method: string; steps: string[]; time: string; explanation_hi: string; explanation_en: string };
+  speedup: string;
+  difficulty: string;
+};
+
+type ChatMsg = { role: 'user' | 'assistant'; content: string };
 
 const SolverPage = () => {
-  const { t } = useLanguage();
-  const [showDemo, setShowDemo] = useState(false);
+  const { t, lang } = useLanguage();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [textInput, setTextInput] = useState('');
+  const [solution, setSolution] = useState<SolutionData | null>(null);
+  const [solving, setSolving] = useState(false);
+  const [error, setError] = useState('');
+
+  // TTS
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const synthRef = useRef(window.speechSynthesis);
+
+  // Chat
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  // Cleanup TTS on unmount
+  useEffect(() => {
+    return () => { synthRef.current.cancel(); };
+  }, []);
 
   const handleImageCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (ev) => {
-        setCapturedImage(ev.target?.result as string);
+        const base64 = ev.target?.result as string;
+        setCapturedImage(base64);
+        solveProblem(base64, null);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const demoSolution = {
-    problem: '47 × 53',
-    traditional: {
-      steps: ['47 × 53', '47 × 3 = 141', '47 × 50 = 2350', '141 + 2350 = 2491'],
-      time: '45 seconds',
-    },
-    vedic: {
-      method: 'Nikhilam Sutra (Base 50)',
-      steps: ['Base = 50', '47 - 50 = -3', '53 - 50 = +3', '50² = 2500', '(-3)(+3) = -9', '2500 - 9 = 2491'],
-      time: '12 seconds',
-    },
+  const handleTextSolve = () => {
+    if (!textInput.trim()) return;
+    solveProblem(null, textInput.trim());
+  };
+
+  const solveProblem = async (imageBase64: string | null, textProblem: string | null) => {
+    setSolving(true);
+    setError('');
+    setSolution(null);
+    setChatMessages([]);
+    synthRef.current.cancel();
+    setIsSpeaking(false);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('math-solver', {
+        body: { imageBase64, textProblem },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+
+      setSolution(data as SolutionData);
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong');
+    } finally {
+      setSolving(false);
+    }
+  };
+
+  const toggleSpeak = () => {
+    if (!solution) return;
+    if (isSpeaking) {
+      synthRef.current.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    const isHindi = lang === 'hi';
+    const trad = isHindi ? solution.traditional.explanation_hi : solution.traditional.explanation_en;
+    const ved = isHindi ? solution.vedic.explanation_hi : solution.vedic.explanation_en;
+
+    const fullText = isHindi
+      ? `सवाल है: ${solution.problem}। पहले पारंपरिक तरीके से: ${trad}। अब वैदिक गणित से: ${solution.vedic.method} सूत्र का उपयोग करके: ${ved}। वैदिक विधि ${solution.speedup} तेज है!`
+      : `The problem is: ${solution.problem}. First, the traditional method: ${trad}. Now the Vedic Math way, using ${solution.vedic.method}: ${ved}. The Vedic method is ${solution.speedup} faster!`;
+
+    const utterance = new SpeechSynthesisUtterance(fullText);
+    utterance.lang = isHindi ? 'hi-IN' : 'en-US';
+    utterance.rate = 0.9;
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    synthRef.current.speak(utterance);
+    setIsSpeaking(true);
+  };
+
+  const sendChatMessage = async () => {
+    if (!chatInput.trim() || chatLoading) return;
+    const userMsg: ChatMsg = { role: 'user', content: chatInput.trim() };
+    const newMessages = [...chatMessages, userMsg];
+    setChatMessages(newMessages);
+    setChatInput('');
+    setChatLoading(true);
+
+    let assistantSoFar = '';
+    const problemContext = solution
+      ? `Problem: ${solution.problem}\nTraditional: ${solution.traditional.steps.join(' → ')}\nVedic (${solution.vedic.method}): ${solution.vedic.steps.join(' → ')}`
+      : '';
+
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solver-chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ messages: newMessages, problemContext }),
+      });
+
+      if (!resp.ok || !resp.body) throw new Error('Stream failed');
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+          if (line.endsWith('\r')) line = line.slice(0, -1);
+          if (line.startsWith(':') || line.trim() === '') continue;
+          if (!line.startsWith('data: ')) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              assistantSoFar += content;
+              setChatMessages(prev => {
+                const last = prev[prev.length - 1];
+                if (last?.role === 'assistant') {
+                  return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantSoFar } : m);
+                }
+                return [...prev, { role: 'assistant', content: assistantSoFar }];
+              });
+            }
+          } catch { /* partial JSON, skip */ }
+        }
+      }
+    } catch (err: any) {
+      setChatMessages(prev => [...prev, { role: 'assistant', content: `❌ ${err.message}` }]);
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   return (
@@ -42,157 +186,212 @@ const SolverPage = () => {
       </div>
 
       {/* Hidden file inputs */}
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleImageCapture}
-      />
-      <input
-        ref={galleryInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleImageCapture}
-      />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageCapture} />
+      <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageCapture} />
 
-      {/* Captured Image Preview */}
-      {capturedImage ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative rounded-2xl overflow-hidden border-2 border-primary/30 bg-card"
-        >
-          <button
-            onClick={() => setCapturedImage(null)}
-            className="absolute top-3 right-3 z-10 bg-background/80 backdrop-blur-sm rounded-full p-1.5 shadow-lg"
-          >
-            <X className="w-4 h-4" />
-          </button>
-          <img src={capturedImage} alt="Captured math problem" className="w-full max-h-64 object-contain" />
-          <div className="p-4 text-center">
-            <p className="text-sm text-muted-foreground mb-3">{t('Image captured! AI solving coming soon...', 'फोटो ली गई! AI हल जल्द आ रहा है...')}</p>
+      {/* Upload / Capture Area */}
+      {!solution && !solving && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+          <div className="border-2 border-dashed border-primary/30 rounded-2xl p-8 text-center bg-primary/5">
+            <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Camera className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <h3 className="font-display font-bold text-base mb-1">{t('Capture or Upload', 'कैप्चर या अपलोड करें')}</h3>
+            <p className="text-sm text-muted-foreground mb-4">{t('Take a photo of any math problem', 'किसी भी गणित के सवाल की फोटो लें')}</p>
             <div className="flex gap-3 justify-center">
-              <button
-                onClick={() => cameraInputRef.current?.click()}
-                className="gradient-primary text-primary-foreground px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-warm"
-              >
-                <Camera className="w-4 h-4" /> {t('Retake', 'दोबारा लें')}
+              <button onClick={() => cameraInputRef.current?.click()} className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-warm">
+                <Camera className="w-4 h-4" /> {t('Camera', 'कैमरा')}
               </button>
-              <button
-                onClick={() => galleryInputRef.current?.click()}
-                className="bg-card border border-border text-foreground px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card"
-              >
-                <Upload className="w-4 h-4" /> {t('Choose Another', 'दूसरी चुनें')}
+              <button onClick={() => galleryInputRef.current?.click()} className="bg-card border border-border text-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card">
+                <Upload className="w-4 h-4" /> {t('Gallery', 'गैलरी')}
               </button>
             </div>
           </div>
-        </motion.div>
-      ) : (
-        /* Upload Area */
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="border-2 border-dashed border-primary/30 rounded-2xl p-8 text-center bg-primary/5"
-        >
-          <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Camera className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h3 className="font-display font-bold text-base mb-1">{t('Capture or Upload', 'कैप्चर या अपलोड करें')}</h3>
-          <p className="text-sm text-muted-foreground mb-4">{t('Take a photo of any math problem', 'किसी भी गणित के सवाल की फोटो लें')}</p>
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={() => cameraInputRef.current?.click()}
-              className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-warm"
-            >
-              <Camera className="w-4 h-4" /> {t('Camera', 'कैमरा')}
-            </button>
-            <button
-              onClick={() => galleryInputRef.current?.click()}
-              className="bg-card border border-border text-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card"
-            >
-              <Upload className="w-4 h-4" /> {t('Gallery', 'गैलरी')}
+
+          {/* Text input */}
+          <div className="flex gap-2">
+            <input
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleTextSolve()}
+              placeholder={t('Or type a problem: 47 × 53', 'या सवाल टाइप करें: 47 × 53')}
+              className="flex-1 bg-card border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+            />
+            <button onClick={handleTextSolve} className="gradient-primary text-primary-foreground px-4 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-warm">
+              <Wand2 className="w-4 h-4" /> {t('Solve', 'हल करो')}
             </button>
           </div>
         </motion.div>
       )}
 
-      {/* Demo Button */}
-      <button
-        onClick={() => setShowDemo(!showDemo)}
-        className="w-full bg-card border border-border rounded-xl p-4 shadow-card text-left flex items-center gap-3 transition-all active:scale-[0.98]"
-      >
-        <div className="w-10 h-10 gradient-warm rounded-xl flex items-center justify-center">
-          <Sparkles className="w-5 h-5 text-primary-foreground" />
-        </div>
-        <div className="flex-1">
-          <h3 className="font-display font-bold text-sm">{t('See Demo Solution', 'डेमो हल देखें')}</h3>
-          <p className="text-xs text-muted-foreground">{t('Compare Traditional vs Vedic methods', 'पारंपरिक बनाम वैदिक विधियों की तुलना करें')}</p>
-        </div>
-        <ArrowRight className="w-4 h-4 text-muted-foreground" />
-      </button>
+      {/* Solving loader */}
+      {solving && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16 space-y-4">
+          <div className="w-20 h-20 gradient-primary rounded-full flex items-center justify-center mx-auto animate-pulse">
+            <Sparkles className="w-10 h-10 text-primary-foreground" />
+          </div>
+          <p className="font-display font-bold text-base">{t('AI is solving...', 'AI हल कर रहा है...')}</p>
+          <p className="text-sm text-muted-foreground">{t('Analyzing with Traditional & Vedic methods', 'पारंपरिक और वैदिक दोनों तरीके से')}</p>
+        </motion.div>
+      )}
 
-      {/* Demo Solution */}
-      {showDemo && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-          <div className="gradient-hero rounded-xl p-4 text-center text-primary-foreground">
-            <p className="text-sm opacity-80">{t('Problem', 'सवाल')}</p>
-            <p className="font-display font-bold text-3xl mt-1">{demoSolution.problem}</p>
+      {/* Error */}
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 text-center">
+          <p className="text-sm text-destructive font-medium">{error}</p>
+          <button onClick={() => { setError(''); setCapturedImage(null); }} className="mt-2 text-xs text-primary underline">{t('Try again', 'दोबारा कोशिश करें')}</button>
+        </div>
+      )}
+
+      {/* Solution Display */}
+      {solution && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+          {/* Header with problem + controls */}
+          <div className="gradient-hero rounded-xl p-4 text-primary-foreground flex items-center justify-between">
+            <div>
+              <p className="text-xs opacity-80">{t('Problem', 'सवाल')}</p>
+              <p className="font-display font-bold text-2xl">{solution.problem}</p>
+              <div className="flex gap-2 mt-1">
+                <span className="text-[10px] bg-primary-foreground/20 px-2 py-0.5 rounded-full">{solution.difficulty}</span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={toggleSpeak} className={`p-3 rounded-xl transition-all ${isSpeaking ? 'bg-primary-foreground text-primary' : 'bg-primary-foreground/20 text-primary-foreground'}`}>
+                {isSpeaking ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+              </button>
+              <button onClick={() => { setSolution(null); setCapturedImage(null); setTextInput(''); setChatMessages([]); synthRef.current.cancel(); setIsSpeaking(false); }} className="p-3 rounded-xl bg-primary-foreground/20 text-primary-foreground">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          {/* TTS Language indicator */}
+          <div className="flex justify-center">
+            <span className="text-xs text-muted-foreground bg-card border border-border px-3 py-1 rounded-full">
+              🔊 {t('Voice: English', 'आवाज़: हिंदी')} • {t('Switch language in top bar', 'भाषा बदलने के लिए ऊपर देखें')}
+            </span>
+          </div>
+
+          {/* Dual Solutions Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Traditional */}
             <div className="bg-card rounded-xl p-4 shadow-card border border-border">
-              <div className="flex items-center gap-1 mb-2">
-                <span className="text-xs font-bold text-muted-foreground">{t('TRADITIONAL', 'पारंपरिक')}</span>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-bold text-muted-foreground uppercase">{t('Traditional Method', 'पारंपरिक तरीका')}</span>
               </div>
-              {demoSolution.traditional.steps.map((step, i) => (
-                <p key={i} className="text-xs text-foreground font-mono py-0.5">{step}</p>
-              ))}
+              <div className="space-y-1.5">
+                {solution.traditional.steps.map((step, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-[10px] bg-muted text-muted-foreground rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">{i + 1}</span>
+                    <p className="text-sm text-foreground font-mono">{step}</p>
+                  </div>
+                ))}
+              </div>
               <div className="flex items-center gap-1 mt-3 text-muted-foreground">
-                <Clock className="w-3 h-3" />
-                <span className="text-xs font-bold">{demoSolution.traditional.time}</span>
+                <Clock className="w-3.5 h-3.5" />
+                <span className="text-xs font-bold">{solution.traditional.time}</span>
               </div>
             </div>
 
+            {/* Vedic */}
             <div className="bg-card rounded-xl p-4 shadow-card border-2 border-primary/30">
-              <div className="flex items-center gap-1 mb-2">
-                <Wand2 className="w-3 h-3 text-primary" />
-                <span className="text-xs font-bold text-primary">{t('VEDIC', 'वैदिक')}</span>
+              <div className="flex items-center gap-2 mb-1">
+                <Wand2 className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-bold text-primary uppercase">{t('Vedic Math', 'वैदिक गणित')}</span>
               </div>
-              <p className="text-[10px] text-secondary font-semibold italic mb-1">{demoSolution.vedic.method}</p>
-              {demoSolution.vedic.steps.map((step, i) => (
-                <p key={i} className="text-xs text-foreground font-mono py-0.5">{step}</p>
-              ))}
-              <div className="flex items-center gap-1 mt-3 text-level">
-                <Clock className="w-3 h-3" />
-                <span className="text-xs font-bold">{demoSolution.vedic.time} ⚡</span>
+              <p className="text-[10px] text-secondary font-semibold italic mb-2">{solution.vedic.method}</p>
+              <div className="space-y-1.5">
+                {solution.vedic.steps.map((step, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-[10px] bg-primary/10 text-primary rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">{i + 1}</span>
+                    <p className="text-sm text-foreground font-mono">{step}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-1 mt-3 text-primary">
+                <Clock className="w-3.5 h-3.5" />
+                <span className="text-xs font-bold">{solution.vedic.time} ⚡</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-level/10 rounded-xl p-4 text-center border border-level/20">
-            <p className="text-sm font-bold text-level">🚀 {t('Vedic method is 3.75x faster!', 'वैदिक विधि 3.75 गुना तेज है!')}</p>
+          {/* Speed comparison */}
+          <div className="bg-primary/10 rounded-xl p-4 text-center border border-primary/20">
+            <p className="text-sm font-bold text-primary">🚀 {t(`Vedic method is ${solution.speedup} faster!`, `वैदिक विधि ${solution.speedup} तेज है!`)}</p>
+          </div>
+
+          {/* Image preview if used */}
+          {capturedImage && (
+            <div className="rounded-xl overflow-hidden border border-border max-h-40">
+              <img src={capturedImage} alt="Problem" className="w-full object-contain max-h-40" />
+            </div>
+          )}
+
+          {/* Chat Section */}
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
+              <MessageCircle className="w-4 h-4 text-primary" />
+              <span className="font-display font-bold text-sm">{t('Ask AI about this problem', 'इस सवाल के बारे में AI से पूछें')}</span>
+            </div>
+
+            {/* Chat messages */}
+            <div className="max-h-64 overflow-y-auto p-3 space-y-3">
+              {chatMessages.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  {t('Ask anything about the solution! e.g. "Explain the Vedic method in detail"', 'हल के बारे में कुछ भी पूछें! जैसे "वैदिक तरीका विस्तार से समझाओ"')}
+                </p>
+              )}
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${msg.role === 'user' ? 'gradient-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
+                    {msg.role === 'assistant' ? (
+                      <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1">
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
+                    ) : msg.content}
+                  </div>
+                </div>
+              ))}
+              {chatLoading && chatMessages[chatMessages.length - 1]?.role !== 'assistant' && (
+                <div className="flex justify-start">
+                  <div className="bg-muted rounded-xl px-3 py-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Chat input */}
+            <div className="flex gap-2 p-3 border-t border-border">
+              <input
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendChatMessage()}
+                placeholder={t('Type your question...', 'अपना सवाल लिखें...')}
+                className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              />
+              <button
+                onClick={sendChatMessage}
+                disabled={chatLoading || !chatInput.trim()}
+                className="gradient-primary text-primary-foreground p-2 rounded-lg disabled:opacity-50"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Solve another */}
+          <div className="flex gap-3 justify-center pt-2">
+            <button onClick={() => cameraInputRef.current?.click()} className="bg-card border border-border text-foreground px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card">
+              <Camera className="w-4 h-4" /> {t('New Photo', 'नई फोटो')}
+            </button>
+            <button onClick={() => { setSolution(null); setCapturedImage(null); setChatMessages([]); synthRef.current.cancel(); setIsSpeaking(false); }} className="bg-card border border-border text-foreground px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card">
+              <Wand2 className="w-4 h-4" /> {t('Type Problem', 'सवाल लिखें')}
+            </button>
           </div>
         </motion.div>
       )}
-
-      {/* Features */}
-      <div className="space-y-2">
-        <h3 className="font-display font-bold text-sm">{t('Features', 'विशेषताएं')}</h3>
-        {[
-          { icon: '📸', text: t('OCR Math Recognition', 'OCR गणित पहचान') },
-          { icon: '✌️', text: t('Dual Solution Output', 'दोहरा समाधान आउटपुट') },
-          { icon: '⏱️', text: t('Time Comparison', 'समय तुलना') },
-          { icon: '📊', text: t('Difficulty Rating', 'कठिनाई रेटिंग') },
-        ].map(f => (
-          <div key={f.text} className="flex items-center gap-3 bg-card rounded-lg p-3 shadow-card border border-border">
-            <span className="text-lg">{f.icon}</span>
-            <span className="text-sm font-medium">{f.text}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };
