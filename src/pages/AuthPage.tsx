@@ -39,10 +39,8 @@ const AuthPage = () => {
           },
         });
         if (error) throw error;
-        toast({
-          title: t('Account created!', 'अकाउंट बन गया!'),
-          description: t('Please check your email to verify.', 'कृपया अपना ईमेल सत्यापित करें।'),
-        });
+        toast({ title: t('Account created! Logging in...', 'अकाउंट बन गया! लॉगिन हो रहा है...') });
+        navigate('/');
       }
     } catch (error: any) {
       toast({ title: t('Error', 'त्रुटि'), description: error.message, variant: 'destructive' });
