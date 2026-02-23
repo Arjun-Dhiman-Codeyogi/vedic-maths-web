@@ -35,6 +35,7 @@ const SolverPage = () => {
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraOnlyRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -188,6 +189,8 @@ const SolverPage = () => {
       {/* Hidden file inputs */}
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageCapture} />
       <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageCapture} />
+      {/* Camera-only input for mobile */}
+      <input ref={cameraOnlyRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleImageCapture} />
 
       {/* Upload / Capture Area */}
       {!solution && !solving && (
@@ -199,10 +202,10 @@ const SolverPage = () => {
             <h3 className="font-display font-bold text-base mb-1">{t('Capture or Upload', 'कैप्चर या अपलोड करें')}</h3>
             <p className="text-sm text-muted-foreground mb-4">{t('Take a photo of any math problem', 'किसी भी गणित के सवाल की फोटो लें')}</p>
             <div className="flex gap-3 justify-center">
-              <button onClick={() => cameraInputRef.current?.click()} className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-warm">
+              <button onClick={() => cameraInputRef.current?.click()} className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-warm hover:scale-105 transition-transform">
                 <Camera className="w-4 h-4" /> {t('Camera', 'कैमरा')}
               </button>
-              <button onClick={() => galleryInputRef.current?.click()} className="bg-card border border-border text-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card">
+              <button onClick={() => galleryInputRef.current?.click()} className="bg-card border border-border text-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card hover:scale-105 transition-transform">
                 <Upload className="w-4 h-4" /> {t('Gallery', 'गैलरी')}
               </button>
             </div>

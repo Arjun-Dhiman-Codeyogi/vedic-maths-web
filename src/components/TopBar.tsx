@@ -39,7 +39,7 @@ const TopBar = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-display font-semibold transition-all ${isActive ? 'gradient-primary text-primary-foreground shadow-warm' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-200 ${isActive ? 'gradient-primary text-primary-foreground shadow-warm scale-105' : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 hover:scale-105 hover:shadow-warm'}`}
               >
                 <item.icon className="w-3.5 h-3.5" />
                 {t(item.labelEn, item.labelHi)}
@@ -71,7 +71,7 @@ const TopBar = () => {
                     key={item.path}
                     to={item.path}
                     onClick={() => setMobileOpen(false)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-xl text-center transition-all ${isActive ? 'gradient-primary text-primary-foreground shadow-warm' : 'bg-muted text-muted-foreground'}`}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl text-center transition-all duration-200 ${isActive ? 'gradient-primary text-primary-foreground shadow-warm' : 'bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary hover:scale-105'}`}
                   >
                     <item.icon className="w-5 h-5" />
                     <span className="text-[10px] font-display font-bold">{t(item.labelEn, item.labelHi)}</span>

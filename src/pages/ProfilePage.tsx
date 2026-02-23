@@ -184,7 +184,7 @@ const ProfilePage = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.08 }}
-              className="bg-card rounded-xl p-3 shadow-card border border-border flex items-center gap-2"
+              className="bg-card rounded-xl p-3 shadow-card border border-border flex items-center gap-2 hover:shadow-elevated hover:scale-105 hover:border-primary/30 transition-all duration-200 cursor-default"
             >
               <span className="text-2xl">{badge.split(' ')[0]}</span>
               <span className="text-xs font-semibold">{badge.split(' ').slice(1).join(' ')}</span>

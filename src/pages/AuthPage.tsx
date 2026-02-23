@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { LogIn, UserPlus, Mail, Lock, User } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, User, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const AuthPage = () => {
@@ -18,6 +18,7 @@ const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [classGrade, setClassGrade] = useState('6');
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +35,7 @@ const AuthPage = () => {
           email,
           password,
           options: {
-            data: { display_name: displayName },
+            data: { display_name: displayName, class_grade: parseInt(classGrade) },
             emailRedirectTo: window.location.origin,
           },
         });
@@ -98,6 +99,24 @@ const AuthPage = () => {
                     className="pl-10 h-12 rounded-xl"
                     required
                   />
+                </div>
+              </div>
+            )}
+
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label className="text-sm font-display font-semibold">{t('Class / Grade', 'कक्षा')}</Label>
+                <div className="relative">
+                  <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <select
+                    value={classGrade}
+                    onChange={(e) => setClassGrade(e.target.value)}
+                    className="w-full pl-10 h-12 rounded-xl bg-background border border-input text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+                  >
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map(g => (
+                      <option key={g} value={g}>{t(`Class ${g}`, `कक्षा ${g}`)}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             )}
