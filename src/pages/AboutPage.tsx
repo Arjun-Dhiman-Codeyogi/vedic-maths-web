@@ -173,8 +173,8 @@ const AboutPage = () => {
             <p className="text-sm text-primary font-semibold">{t('Founder & Developer', 'संस्थापक और डेवलपर')}</p>
             <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
               {t(
-                'Arjun Dhiman is 18 years old and currently pursuing BCA from HSR College under Maa Shakumbari University. Son of Mr. Deepak Kumar, he is passionate about making mathematics accessible and enjoyable for every student through technology. Built MathGenius to bridge the gap between ancient Vedic wisdom and modern learning.',
-                'अर्जुन धीमान 18 साल के हैं और वर्तमान में माँ शाकुम्भरी विश्वविद्यालय के अंतर्गत HSR कॉलेज से BCA कर रहे हैं। श्री दीपक कुमार के पुत्र, वे प्रौद्योगिकी के माध्यम से हर छात्र के लिए गणित को सुलभ और आनंददायक बनाने के प्रति उत्साही हैं। प्राचीन वैदिक ज्ञान और आधुनिक शिक्षा के बीच की खाई को पाटने के लिए MathGenius बनाया।'
+                'I am Arjun Dhiman, 18 years old, currently pursuing BCA from HSR College under Maa Shakumbari University. Son of Mr. Deepak Kumar. I built MathGenius for students who struggle with math — to make it simple, fun and easy for them using Vedic Math tricks and AI. My goal is that no student should feel scared of math ever again.',
+                'मैं अर्जुन धीमान हूँ, 18 साल का, वर्तमान में माँ शाकुम्भरी विश्वविद्यालय के अंतर्गत HSR कॉलेज से BCA कर रहा हूँ। पिता श्री दीपक कुमार। मैंने MathGenius उन बच्चों के लिए बनाया है जो गणित में कमजोर हैं — ताकि वैदिक गणित ट्रिक्स और AI की मदद से गणित उनके लिए आसान, मज़ेदार और सरल बन जाए। मेरा लक्ष्य है कि कोई भी बच्चा गणित से कभी न डरे।'
               )}
             </p>
             <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
