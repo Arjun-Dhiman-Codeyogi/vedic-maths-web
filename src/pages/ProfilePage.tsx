@@ -51,7 +51,7 @@ const ProfilePage = () => {
   ];
 
   return (
-    <div className="px-4 py-4 space-y-5 max-w-5xl mx-auto">
+    <div className="px-4 py-4 md:py-8 space-y-5 max-w-4xl mx-auto">
       {/* Quick Settings Bar */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
         className="flex items-center justify-between bg-card rounded-xl p-3 shadow-card border border-border"
