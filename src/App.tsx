@@ -3,7 +3,15 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { LanguageProvider } from "./contexts/LanguageContext";
+import { GameProvider } from "./contexts/GameContext";
+import AppLayout from "./components/AppLayout";
+import Dashboard from "./pages/Dashboard";
+import LearnPage from "./pages/LearnPage";
+import PracticePage from "./pages/PracticePage";
+import AbacusPage from "./pages/AbacusPage";
+import SolverPage from "./pages/SolverPage";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -11,15 +19,25 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <LanguageProvider>
+        <GameProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route element={<AppLayout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/learn" element={<LearnPage />} />
+                <Route path="/practice" element={<PracticePage />} />
+                <Route path="/abacus" element={<AbacusPage />} />
+                <Route path="/solver" element={<SolverPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </GameProvider>
+      </LanguageProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
