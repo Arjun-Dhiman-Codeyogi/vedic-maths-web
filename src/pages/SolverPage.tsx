@@ -1,11 +1,25 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Camera, Upload, Image as ImageIcon, Wand2, ArrowRight, Clock, Sparkles } from 'lucide-react';
+import { Camera, Upload, Image as ImageIcon, Wand2, ArrowRight, Clock, Sparkles, X } from 'lucide-react';
 
 const SolverPage = () => {
   const { t } = useLanguage();
   const [showDemo, setShowDemo] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setCapturedImage(ev.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const demoSolution = {
     problem: '47 × 53',
@@ -27,26 +41,83 @@ const SolverPage = () => {
         <p className="text-sm text-muted-foreground">{t('Upload a math problem & get dual solutions', 'गणित का सवाल अपलोड करें और दो तरीके से हल पाएं')}</p>
       </div>
 
-      {/* Upload Area */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="border-2 border-dashed border-primary/30 rounded-2xl p-8 text-center bg-primary/5"
-      >
-        <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Camera className="w-8 h-8 text-primary-foreground" />
-        </div>
-        <h3 className="font-display font-bold text-base mb-1">{t('Capture or Upload', 'कैप्चर या अपलोड करें')}</h3>
-        <p className="text-sm text-muted-foreground mb-4">{t('Take a photo of any math problem', 'किसी भी गणित के सवाल की फोटो लें')}</p>
-        <div className="flex gap-3 justify-center">
-          <button className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-warm">
-            <Camera className="w-4 h-4" /> {t('Camera', 'कैमरा')}
+      {/* Hidden file inputs */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleImageCapture}
+      />
+      <input
+        ref={galleryInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageCapture}
+      />
+
+      {/* Captured Image Preview */}
+      {capturedImage ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative rounded-2xl overflow-hidden border-2 border-primary/30 bg-card"
+        >
+          <button
+            onClick={() => setCapturedImage(null)}
+            className="absolute top-3 right-3 z-10 bg-background/80 backdrop-blur-sm rounded-full p-1.5 shadow-lg"
+          >
+            <X className="w-4 h-4" />
           </button>
-          <button className="bg-card border border-border text-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card">
-            <Upload className="w-4 h-4" /> {t('Gallery', 'गैलरी')}
-          </button>
-        </div>
-      </motion.div>
+          <img src={capturedImage} alt="Captured math problem" className="w-full max-h-64 object-contain" />
+          <div className="p-4 text-center">
+            <p className="text-sm text-muted-foreground mb-3">{t('Image captured! AI solving coming soon...', 'फोटो ली गई! AI हल जल्द आ रहा है...')}</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => cameraInputRef.current?.click()}
+                className="gradient-primary text-primary-foreground px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-warm"
+              >
+                <Camera className="w-4 h-4" /> {t('Retake', 'दोबारा लें')}
+              </button>
+              <button
+                onClick={() => galleryInputRef.current?.click()}
+                className="bg-card border border-border text-foreground px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card"
+              >
+                <Upload className="w-4 h-4" /> {t('Choose Another', 'दूसरी चुनें')}
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      ) : (
+        /* Upload Area */
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="border-2 border-dashed border-primary/30 rounded-2xl p-8 text-center bg-primary/5"
+        >
+          <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Camera className="w-8 h-8 text-primary-foreground" />
+          </div>
+          <h3 className="font-display font-bold text-base mb-1">{t('Capture or Upload', 'कैप्चर या अपलोड करें')}</h3>
+          <p className="text-sm text-muted-foreground mb-4">{t('Take a photo of any math problem', 'किसी भी गणित के सवाल की फोटो लें')}</p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => cameraInputRef.current?.click()}
+              className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-warm"
+            >
+              <Camera className="w-4 h-4" /> {t('Camera', 'कैमरा')}
+            </button>
+            <button
+              onClick={() => galleryInputRef.current?.click()}
+              className="bg-card border border-border text-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card"
+            >
+              <Upload className="w-4 h-4" /> {t('Gallery', 'गैलरी')}
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       {/* Demo Button */}
       <button
@@ -66,14 +137,12 @@ const SolverPage = () => {
       {/* Demo Solution */}
       {showDemo && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-          {/* Problem */}
           <div className="gradient-hero rounded-xl p-4 text-center text-primary-foreground">
             <p className="text-sm opacity-80">{t('Problem', 'सवाल')}</p>
             <p className="font-display font-bold text-3xl mt-1">{demoSolution.problem}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            {/* Traditional */}
             <div className="bg-card rounded-xl p-4 shadow-card border border-border">
               <div className="flex items-center gap-1 mb-2">
                 <span className="text-xs font-bold text-muted-foreground">{t('TRADITIONAL', 'पारंपरिक')}</span>
@@ -87,7 +156,6 @@ const SolverPage = () => {
               </div>
             </div>
 
-            {/* Vedic */}
             <div className="bg-card rounded-xl p-4 shadow-card border-2 border-primary/30">
               <div className="flex items-center gap-1 mb-2">
                 <Wand2 className="w-3 h-3 text-primary" />
@@ -104,7 +172,6 @@ const SolverPage = () => {
             </div>
           </div>
 
-          {/* Speed Comparison */}
           <div className="bg-level/10 rounded-xl p-4 text-center border border-level/20">
             <p className="text-sm font-bold text-level">🚀 {t('Vedic method is 3.75x faster!', 'वैदिक विधि 3.75 गुना तेज है!')}</p>
           </div>
