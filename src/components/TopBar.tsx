@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useGame } from '@/contexts/GameContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Globe, Flame, BookOpen, Brain, Calculator, Camera, Video, User, LogIn, LogOut, Menu, X } from 'lucide-react';
+import { BookOpen, Brain, Calculator, Camera, Video, User, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const navItems = [
@@ -16,25 +15,9 @@ const navItems = [
 ];
 
 const TopBar = () => {
-  const { lang, toggleLang, t } = useLanguage();
-  const { student } = useGame();
+  const { t } = useLanguage();
   const location = useLocation();
-  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
-  };
 
   return (
     <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border">
@@ -64,41 +47,10 @@ const TopBar = () => {
           })}
         </nav>
 
-        {/* Right Section */}
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded-full">
-              <Flame className="w-4 h-4 text-streak animate-fire-flicker" />
-              <span className="text-xs font-bold">{student.streak}</span>
-            </div>
-            <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded-full">
-              <span className="text-xs">⚡</span>
-              <span className="text-xs font-bold">{student.xp} XP</span>
-            </div>
-          </div>
-
-          <button onClick={toggleLang} className="flex items-center gap-1 bg-muted px-2 py-1 rounded-full hover:bg-accent/20 transition-colors">
-            <Globe className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className="text-xs font-bold">{lang === 'en' ? 'हि' : 'EN'}</span>
-          </button>
-
-          {user ? (
-            <button onClick={handleLogout} className="flex items-center gap-1 bg-muted px-2 py-1 rounded-full hover:bg-destructive/20 transition-colors">
-              <LogOut className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-xs font-bold hidden sm:inline">{t('Logout', 'लॉगआउट')}</span>
-            </button>
-          ) : (
-            <Link to="/auth" className="flex items-center gap-1 gradient-primary px-3 py-1 rounded-full shadow-warm">
-              <LogIn className="w-3.5 h-3.5 text-primary-foreground" />
-              <span className="text-xs font-bold text-primary-foreground">{t('Login', 'लॉगिन')}</span>
-            </Link>
-          )}
-
-          {/* Mobile menu button */}
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-1.5 rounded-lg bg-muted">
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
+        {/* Mobile menu button */}
+        <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-1.5 rounded-lg bg-muted">
+          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
 
       {/* Mobile Nav Dropdown */}
@@ -110,7 +62,7 @@ const TopBar = () => {
             exit={{ height: 0, opacity: 0 }}
             className="md:hidden border-t border-border bg-card overflow-hidden"
           >
-            <div className="p-3 grid grid-cols-3 gap-2">
+            <div className="max-w-5xl mx-auto p-3 grid grid-cols-3 gap-2">
               {navItems.map(item => {
                 const isActive = location.pathname === item.path;
                 return (
