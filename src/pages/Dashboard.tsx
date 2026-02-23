@@ -124,17 +124,19 @@ const Dashboard = () => {
       {/* Recent Badges */}
       <div>
         <h3 className="font-display font-bold text-base mb-3">{t('Your Badges', 'आपके बैज')}</h3>
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {student.badges.map((badge, i) => (
             <motion.div
               key={badge}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.6 + i * 0.1 }}
-              className="flex-shrink-0 bg-card rounded-xl p-3 shadow-card border border-border min-w-[100px] text-center"
+              className="bg-card rounded-2xl p-4 shadow-card border border-border text-center"
             >
-              <span className="text-2xl">{badge.split(' ')[0]}</span>
-              <p className="text-[10px] font-semibold mt-1 text-muted-foreground">{badge.split(' ').slice(1).join(' ')}</p>
+              <div className="w-14 h-14 mx-auto rounded-xl gradient-primary flex items-center justify-center mb-2">
+                <span className="text-3xl">{badge.split(' ')[0]}</span>
+              </div>
+              <p className="text-xs font-bold font-display">{badge.split(' ').slice(1).join(' ')}</p>
             </motion.div>
           ))}
         </div>

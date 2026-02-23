@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StudentData {
   name: string;
@@ -46,6 +47,30 @@ export const useGame = () => useContext(GameContext);
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [student, setStudent] = useState<StudentData>(defaultStudent);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const displayName = session.user.user_metadata?.display_name || 
+                           session.user.email?.split('@')[0] || 
+                           'Student';
+        setStudent(prev => ({ ...prev, name: displayName }));
+      } else {
+        setStudent(prev => ({ ...prev, name: 'Student' }));
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const displayName = session.user.user_metadata?.display_name || 
+                           session.user.email?.split('@')[0] || 
+                           'Student';
+        setStudent(prev => ({ ...prev, name: displayName }));
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const addXP = (amount: number) => {
     setStudent(prev => {
