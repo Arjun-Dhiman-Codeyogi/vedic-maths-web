@@ -34,18 +34,64 @@ const SolverPage = () => {
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
-  const cameraOnlyRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-  // Cleanup TTS on unmount
+  // Cleanup TTS and camera on unmount
   useEffect(() => {
-    return () => { synthRef.current.cancel(); };
-  }, []);
+    return () => {
+      synthRef.current.cancel();
+      cameraStream?.getTracks().forEach(t => t.stop());
+    };
+  }, [cameraStream]);
+
+  const openCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      });
+      setCameraStream(stream);
+      setShowCamera(true);
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        }
+      }, 100);
+    } catch {
+      // Fallback: if camera API fails, use file input
+      galleryInputRef.current?.click();
+    }
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0);
+    const base64 = canvas.toDataURL('image/jpeg', 0.85);
+    closeCamera();
+    setCapturedImage(base64);
+    solveProblem(base64, null);
+  };
+
+  const closeCamera = () => {
+    cameraStream?.getTracks().forEach(t => t.stop());
+    setCameraStream(null);
+    setShowCamera(false);
+  };
 
   const handleImageCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -188,12 +234,24 @@ const SolverPage = () => {
       </div>
 
       {/* Hidden file inputs */}
-      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageCapture} />
       <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageCapture} />
-      {/* Camera-only input for mobile */}
-      <input ref={cameraOnlyRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleImageCapture} />
+      <canvas ref={canvasRef} className="hidden" />
 
-      {/* Upload / Capture Area */}
+      {/* Live Camera View */}
+      {showCamera && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-50 bg-black flex flex-col">
+          <video ref={videoRef} autoPlay playsInline muted className="flex-1 object-cover w-full" />
+          <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-6">
+            <button onClick={closeCamera} className="w-12 h-12 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow-lg">
+              <X className="w-6 h-6" />
+            </button>
+            <button onClick={capturePhoto} className="w-16 h-16 rounded-full border-4 border-primary-foreground bg-primary-foreground/20 flex items-center justify-center shadow-lg active:scale-90 transition-transform">
+              <div className="w-12 h-12 rounded-full bg-primary-foreground" />
+            </button>
+          </div>
+        </motion.div>
+      )}
+
       {!solution && !solving && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           <div className="border-2 border-dashed border-primary/30 rounded-2xl p-8 text-center bg-primary/5">
@@ -203,7 +261,7 @@ const SolverPage = () => {
             <h3 className="font-display font-bold text-base mb-1">{t('Capture or Upload', 'कैप्चर या अपलोड करें')}</h3>
             <p className="text-sm text-muted-foreground mb-4">{t('Take a photo of any math problem', 'किसी भी गणित के सवाल की फोटो लें')}</p>
             <div className="flex gap-3 justify-center">
-              <button onClick={() => cameraInputRef.current?.click()} className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-warm hover:scale-105 transition-transform">
+              <button onClick={openCamera} className="gradient-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-warm hover:scale-105 transition-transform">
                 <Camera className="w-4 h-4" /> {t('Camera', 'कैमरा')}
               </button>
               <button onClick={() => galleryInputRef.current?.click()} className="bg-card border border-border text-foreground px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card hover:scale-105 transition-transform">
@@ -441,7 +499,7 @@ const SolverPage = () => {
 
           {/* Solve another */}
           <div className="flex gap-3 justify-center pt-2">
-            <button onClick={() => cameraInputRef.current?.click()} className="bg-card border border-border text-foreground px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card">
+            <button onClick={openCamera} className="bg-card border border-border text-foreground px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card">
               <Camera className="w-4 h-4" /> {t('New Photo', 'नई फोटो')}
             </button>
             <button onClick={() => { setSolution(null); setCapturedImage(null); setChatMessages([]); synthRef.current.cancel(); setIsSpeaking(false); }} className="bg-card border border-border text-foreground px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-card">
