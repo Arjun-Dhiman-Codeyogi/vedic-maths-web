@@ -61,7 +61,7 @@ const LearnPage = () => {
   const [activeCategory, setActiveCategory] = useState('vedic');
 
   return (
-    <div className="px-4 py-4 md:py-8 space-y-4 max-w-4xl mx-auto">
+    <div className="px-4 py-4 md:py-8 space-y-4 max-w-7xl mx-auto">
       <div>
         <h2 className="font-display font-bold text-xl">{t('Learn & Master', 'सीखें और महारत हासिल करें')}</h2>
         <p className="text-sm text-muted-foreground">{t('Vedic Math, Abacus & Brain Power', 'वैदिक गणित, अबेकस और मस्तिष्क शक्ति')}</p>

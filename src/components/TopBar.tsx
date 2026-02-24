@@ -22,7 +22,7 @@ const TopBar = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border">
-      <div className="max-w-4xl mx-auto flex items-center justify-between px-4 h-14">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 h-14">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
@@ -63,7 +63,7 @@ const TopBar = () => {
             exit={{ height: 0, opacity: 0 }}
             className="md:hidden border-t border-border bg-card overflow-hidden"
           >
-            <div className="max-w-4xl mx-auto p-3 grid grid-cols-3 gap-2">
+            <div className="max-w-7xl mx-auto p-3 grid grid-cols-3 gap-2">
               {navItems.map(item => {
                 const isActive = location.pathname === item.path;
                 return (

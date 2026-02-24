@@ -333,7 +333,7 @@ const PracticePage = () => {
 
   if (!isPlaying) {
     return (
-      <div className="px-4 py-4 md:py-8 space-y-5 max-w-4xl mx-auto">
+      <div className="px-4 py-4 md:py-8 space-y-5 max-w-7xl mx-auto">
         <div>
           <h2 className="font-display font-bold text-xl">{t('Practice Mode', 'अभ्यास मोड')}</h2>
           <p className="text-sm text-muted-foreground">{t('Train your mental math skills', 'अपने गणित कौशल को प्रशिक्षित करें')}</p>
@@ -399,7 +399,7 @@ const PracticePage = () => {
   }
 
   return (
-    <div className="px-4 py-4 md:py-8 space-y-4 h-full flex flex-col max-w-4xl mx-auto w-full">
+    <div className="px-4 py-4 md:py-8 space-y-4 h-full flex flex-col max-w-7xl mx-auto w-full">
       {/* Timer & Score Bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 bg-card rounded-full px-3 py-1.5 shadow-card">

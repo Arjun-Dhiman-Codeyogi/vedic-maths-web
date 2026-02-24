@@ -227,7 +227,7 @@ const SolverPage = () => {
   };
 
   return (
-    <div className="px-4 py-4 md:py-8 space-y-5 max-w-4xl mx-auto">
+    <div className="px-4 py-4 md:py-8 space-y-5 max-w-7xl mx-auto">
       <div>
         <h2 className="font-display font-bold text-xl">{t('AI Photo Solver', 'AI फोटो सॉल्वर')}</h2>
         <p className="text-sm text-muted-foreground">{t('Upload a math problem & get dual solutions', 'गणित का सवाल अपलोड करें और दो तरीके से हल पाएं')}</p>
