@@ -21,7 +21,7 @@ const AboutPage = () => {
   ];
 
   return (
-    <div className="px-4 py-4 md:py-8 space-y-6 max-w-4xl mx-auto">
+    <div className="px-4 py-4 md:py-8 space-y-6 max-w-7xl mx-auto">
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

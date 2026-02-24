@@ -310,7 +310,7 @@ const SutrasPage = () => {
   const [expanded, setExpanded] = useState<number | null>(null);
 
   return (
-    <div className="px-4 py-4 md:py-8 space-y-5 max-w-4xl mx-auto">
+    <div className="px-4 py-4 md:py-8 space-y-5 max-w-7xl mx-auto">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <div className="gradient-hero rounded-2xl p-6 text-primary-foreground text-center relative overflow-hidden">

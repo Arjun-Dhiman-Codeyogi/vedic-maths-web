@@ -20,7 +20,7 @@ const Dashboard = () => {
   const xpPercent = Math.round((student.xp / student.xpToNext) * 100);
 
   return (
-    <div className="px-4 py-4 md:py-8 space-y-5 max-w-4xl mx-auto">
+    <div className="px-4 py-4 md:py-8 space-y-5 max-w-7xl mx-auto">
       {/* Hero Welcome Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

@@ -90,7 +90,7 @@ const VideosPage = () => {
 
   if (playingVideo) {
     return (
-      <div className="px-4 py-4 md:py-8 space-y-4 max-w-4xl mx-auto">
+      <div className="px-4 py-4 md:py-8 space-y-4 max-w-7xl mx-auto">
         <button
           onClick={() => setPlayingVideo(null)}
           className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
@@ -113,7 +113,7 @@ const VideosPage = () => {
   }
 
   return (
-    <div className="px-4 py-4 md:py-8 space-y-5 max-w-4xl mx-auto">
+    <div className="px-4 py-4 md:py-8 space-y-5 max-w-7xl mx-auto">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
