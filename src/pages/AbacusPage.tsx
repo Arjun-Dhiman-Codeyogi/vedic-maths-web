@@ -42,10 +42,7 @@ const AbacusPage = () => {
   const toggleBottom = (rod: number, bead: number) => {
     setBeads(prev => {
       const newBottom = prev.bottom.map(r => [...r]);
-      // Toggle all beads from this one up
-      for (let b = bead; b < BEADS_BOTTOM; b++) {
-        newBottom[rod][b] = !prev.bottom[rod][bead];
-      }
+      newBottom[rod][bead] = !prev.bottom[rod][bead];
       return { ...prev, bottom: newBottom };
     });
   };
@@ -111,11 +108,11 @@ const AbacusPage = () => {
                   {Array(BEADS_BOTTOM).fill(0).map((_, bead) => (
                     <motion.button
                       key={bead}
-                      onClick={() => toggleBottom(rod, BEADS_BOTTOM - 1 - bead)}
-                      animate={{ y: beads.bottom[rod][BEADS_BOTTOM - 1 - bead] ? -20 : 0 }}
+                      onClick={() => toggleBottom(rod, bead)}
+                      animate={{ y: beads.bottom[rod][bead] ? -8 : 0 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                       className={`relative z-10 w-10 h-6 rounded-full shadow-md border-2 transition-colors ${
-                        beads.bottom[rod][BEADS_BOTTOM - 1 - bead]
+                        beads.bottom[rod][bead]
                           ? 'gradient-warm border-secondary/50'
                           : 'bg-muted border-border'
                       }`}

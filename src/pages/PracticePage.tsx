@@ -62,6 +62,7 @@ interface Problem {
   display: string;
   answer: number;
   hint: { en: string; hi: string };
+  solution?: { en: string; hi: string };
 }
 
 const generateFingerProblem = (difficulty: Difficulty, op: FingerOp): Problem => {
@@ -161,14 +162,54 @@ const generateVedicProblem = (difficulty: Difficulty, operation: VedicOp): Probl
 
   switch (operation) {
     case '+': {
+      // 50% chance of 3-number addition for medium/hard, always for easy if rand
+      const useThree = Math.random() > 0.5;
       const a = Math.floor(Math.random() * range) + 1;
       const b = Math.floor(Math.random() * range) + 1;
-      return { display: `${a} + ${b}`, answer: a + b, hint: { en: 'Use Ekadhikena: Add 1 to the previous', hi: 'एकाधिकेन: पिछले में 1 जोड़ें' } };
+      if (useThree) {
+        const c = Math.floor(Math.random() * range) + 1;
+        const step1 = a + b;
+        const ans = step1 + c;
+        return {
+          display: `${a} + ${b} + ${c}`,
+          answer: ans,
+          hint: { en: 'Add left to right: first add two numbers, then add the third', hi: 'बाएं से दाएं जोड़ें: पहले दो को जोड़ें, फिर तीसरा' },
+          solution: { en: `Step 1: ${a} + ${b} = ${step1}  →  Step 2: ${step1} + ${c} = ${ans}`, hi: `चरण 1: ${a} + ${b} = ${step1}  →  चरण 2: ${step1} + ${c} = ${ans}` },
+        };
+      }
+      const ans2 = a + b;
+      return {
+        display: `${a} + ${b}`,
+        answer: ans2,
+        hint: { en: 'Use Ekadhikena: Add 1 to the previous', hi: 'एकाधिकेन: पिछले में 1 जोड़ें' },
+        solution: { en: `${a} + ${b} = ${ans2}`, hi: `${a} + ${b} = ${ans2}` },
+      };
     }
     case '-': {
+      const useThree = Math.random() > 0.5;
       const a = Math.floor(Math.random() * range) + 10;
-      const b = Math.floor(Math.random() * Math.min(a, range)) + 1;
-      return { display: `${a} - ${b}`, answer: a - b, hint: { en: 'Use Nikhilam: All from 9, last from 10', hi: 'निखिलम: सब 9 से, आखिरी 10 से' } };
+      const b = Math.floor(Math.random() * Math.min(a - 1, range)) + 1;
+      if (useThree) {
+        const maxC = a - b - 1;
+        if (maxC > 1) {
+          const c = Math.floor(Math.random() * Math.min(maxC, range)) + 1;
+          const step1 = a - b;
+          const ans = step1 - c;
+          return {
+            display: `${a} - ${b} - ${c}`,
+            answer: ans,
+            hint: { en: 'Subtract left to right: subtract first number, then the second', hi: 'बाएं से दाएं घटाएं: पहले घटाएं, फिर दूसरा' },
+            solution: { en: `Step 1: ${a} - ${b} = ${step1}  →  Step 2: ${step1} - ${c} = ${ans}`, hi: `चरण 1: ${a} - ${b} = ${step1}  →  चरण 2: ${step1} - ${c} = ${ans}` },
+          };
+        }
+      }
+      const ans2 = a - b;
+      return {
+        display: `${a} - ${b}`,
+        answer: ans2,
+        hint: { en: 'Use Nikhilam: All from 9, last from 10', hi: 'निखिलम: सब 9 से, आखिरी 10 से' },
+        solution: { en: `${a} - ${b} = ${ans2}`, hi: `${a} - ${b} = ${ans2}` },
+      };
     }
     case '×': {
       const a = Math.floor(Math.random() * (difficulty === 'easy' ? 12 : 30)) + 2;
@@ -265,12 +306,14 @@ const PracticePage = () => {
   const [totalAnswered, setTotalAnswered] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [showVedicHint, setShowVedicHint] = useState(false);
+  const [timerPaused, setTimerPaused] = useState(false);
+  const [showSolution, setShowSolution] = useState(false);
 
   useEffect(() => {
-    if (!isPlaying || timeLeft <= 0) return;
+    if (!isPlaying || timeLeft <= 0 || timerPaused) return;
     const timer = setInterval(() => setTimeLeft(t => t - 1), 1000);
     return () => clearInterval(timer);
-  }, [isPlaying, timeLeft]);
+  }, [isPlaying, timeLeft, timerPaused]);
 
   useEffect(() => {
     if (timeLeft <= 0 && isPlaying) {
@@ -296,6 +339,8 @@ const PracticePage = () => {
     setProblem(generateProblem(difficulty, operation));
     setUserAnswer('');
     setResult(null);
+    setTimerPaused(false);
+    setShowSolution(false);
   };
 
   const checkAnswer = useCallback(() => {
@@ -310,16 +355,26 @@ const PracticePage = () => {
       setScore(s => s + points + streak * 2);
       setStreak(s => s + 1);
       setCorrectCount(c => c + 1);
+      setTimeout(() => {
+        setResult(null);
+        setUserAnswer('');
+        setProblem(generateProblem(difficulty, operation));
+        setShowVedicHint(false);
+        setShowSolution(false);
+      }, 800);
     } else {
       setStreak(0);
+      setTimerPaused(true);
+      setShowSolution(true);
+      setTimeout(() => {
+        setResult(null);
+        setUserAnswer('');
+        setProblem(generateProblem(difficulty, operation));
+        setShowVedicHint(false);
+        setShowSolution(false);
+        setTimerPaused(false);
+      }, 3500);
     }
-
-    setTimeout(() => {
-      setResult(null);
-      setUserAnswer('');
-      setProblem(generateProblem(difficulty, operation));
-      setShowVedicHint(false);
-    }, 800);
   }, [userAnswer, problem, difficulty, operation, streak, updateAccuracy]);
 
   const handleKeyPad = (key: string) => {
@@ -403,8 +458,8 @@ const PracticePage = () => {
       {/* Timer & Score Bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 bg-card rounded-full px-3 py-1.5 shadow-card">
-          <Timer className={`w-4 h-4 ${timeLeft <= 10 ? 'text-destructive animate-pulse' : 'text-muted-foreground'}`} />
-          <span className={`font-display font-bold text-sm ${timeLeft <= 10 ? 'text-destructive' : ''}`}>{timeLeft}s</span>
+          <Timer className={`w-4 h-4 ${timerPaused ? 'text-secondary animate-pulse' : timeLeft <= 10 ? 'text-destructive animate-pulse' : 'text-muted-foreground'}`} />
+          <span className={`font-display font-bold text-sm ${timerPaused ? 'text-secondary' : timeLeft <= 10 ? 'text-destructive' : ''}`}>{timerPaused ? '⏸' : `${timeLeft}s`}</span>
         </div>
         <div className="flex items-center gap-3">
           {streak >= 3 && (
@@ -444,6 +499,24 @@ const PracticePage = () => {
               <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="text-xs text-secondary mt-2 bg-secondary/10 rounded-lg p-2">
                 {t(problem.hint.en, problem.hint.hi)}
               </motion.p>
+            )}
+
+            {showSolution && result === 'wrong' && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-3 bg-destructive/10 border border-destructive/30 rounded-xl p-3 text-left"
+              >
+                <p className="text-xs font-bold text-destructive mb-1">{t('Correct Answer:', 'सही उत्तर:')}</p>
+                <p className="text-xl font-display font-bold text-foreground">{problem.answer}</p>
+                {problem.solution && (
+                  <>
+                    <p className="text-xs font-semibold text-muted-foreground mt-2 mb-0.5">{t('Solution:', 'हल:')}</p>
+                    <p className="text-xs text-foreground font-medium">{t(problem.solution.en, problem.solution.hi)}</p>
+                  </>
+                )}
+                <p className="text-[10px] text-muted-foreground mt-2">{t('Next question in 3 seconds…', '3 सेकंड में अगला सवाल…')}</p>
+              </motion.div>
             )}
           </motion.div>
         </AnimatePresence>

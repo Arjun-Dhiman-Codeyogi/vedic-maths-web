@@ -32,9 +32,9 @@ const videoTopics: VideoTopic[] = [
     icon: Plus,
     color: 'from-primary to-secondary',
     subtopics: [
-      { titleEn: 'Vedic Maths Addition & Subtraction Tricks', titleHi: 'वैदिक गणित जोड़ और घटाव ट्रिक्स', durationEn: '15 min', durationHi: '15 मिनट', youtubeId: 'hdHTp0sQFXg' },
-      { titleEn: 'Addition Tricks for Fast Calculation', titleHi: 'तेज गणना के लिए जोड़ ट्रिक्स', durationEn: '12 min', durationHi: '12 मिनट', youtubeId: 'hCg_xZgUkmw' },
-      { titleEn: 'Speed Calculation - All Exams', titleHi: 'गति गणना - सभी परीक्षाएं', durationEn: '20 min', durationHi: '20 मिनट', youtubeId: 'WFSmHbf7f88' },
+      { titleEn: 'Vedic Maths Addition & Subtraction Tricks', titleHi: 'वैदिक गणित जोड़ और घटाव ट्रिक्स', durationEn: '30 min', durationHi: '30 मिनट', youtubeId: 'hdHTp0sQFXg' },
+      { titleEn: 'Addition Tricks for Fast Calculation', titleHi: 'तेज गणना के लिए जोड़ ट्रिक्स', durationEn: '4 min', durationHi: '4 मिनट', youtubeId: 'hCg_xZgUkmw' },
+      { titleEn: 'Speed Calculation - All Exams', titleHi: 'गति गणना - सभी परीक्षाएं', durationEn: '14 min', durationHi: '14 मिनट', youtubeId: 'WFSmHbf7f88' },
     ],
   },
   {
@@ -46,9 +46,9 @@ const videoTopics: VideoTopic[] = [
     icon: Minus,
     color: 'from-secondary to-accent',
     subtopics: [
-      { titleEn: 'Subtraction Made Easy - Vedic Maths', titleHi: 'घटाव आसान बनाएं - वैदिक गणित', durationEn: '10 min', durationHi: '10 मिनट', youtubeId: '5XG7WETxBeM' },
-      { titleEn: 'Nikhilam Subtraction Method', titleHi: 'निखिलम घटाव विधि', durationEn: '8 min', durationHi: '8 मिनट', youtubeId: 'dyQx1sHqaJE' },
-      { titleEn: 'Fast Subtraction Tricks', titleHi: 'तेज घटाव ट्रिक्स', durationEn: '12 min', durationHi: '12 मिनट', youtubeId: 'grkWGeqW99c' },
+      { titleEn: 'Subtraction Made Easy - Vedic Maths', titleHi: 'घटाव आसान बनाएं - वैदिक गणित', durationEn: '4 min', durationHi: '4 मिनट', youtubeId: '5XG7WETxBeM' },
+      { titleEn: 'Nikhilam Subtraction Method', titleHi: 'निखिलम घटाव विधि', durationEn: '10 min', durationHi: '10 मिनट', youtubeId: 'dyQx1sHqaJE' },
+      { titleEn: 'Fast Subtraction Tricks', titleHi: 'तेज घटाव ट्रिक्स', durationEn: '9 min', durationHi: '9 मिनट', youtubeId: 'grkWGeqW99c' },
     ],
   },
   {
@@ -61,9 +61,9 @@ const videoTopics: VideoTopic[] = [
     color: 'from-accent to-primary',
     subtopics: [
       { titleEn: '2-Digit Multiplication Trick', titleHi: '2 अंकों की गुणा ट्रिक', durationEn: '8 min', durationHi: '8 मिनट', youtubeId: 'J1N64sosuoY' },
-      { titleEn: 'Speed Calculation Tricks', titleHi: 'गति गणना ट्रिक्स', durationEn: '15 min', durationHi: '15 मिनट', youtubeId: 'C6z8yjZRV3o' },
-      { titleEn: 'Squaring Numbers 1-100 in 3 Seconds', titleHi: '1-100 का वर्ग 3 सेकंड में', durationEn: '12 min', durationHi: '12 मिनट', youtubeId: 'Ko5Dl_QGj0g' },
-      { titleEn: 'Vedic Math Multiplication Secrets', titleHi: 'वैदिक गणित गुणा रहस्य', durationEn: '10 min', durationHi: '10 मिनट', youtubeId: '-z7aHP72kCM' },
+      { titleEn: 'Speed Calculation Tricks', titleHi: 'गति गणना ट्रिक्स', durationEn: '30 min', durationHi: '30 मिनट', youtubeId: 'R2AGn7D9N4E' },
+      { titleEn: 'Squaring Numbers 1-100 in 3 Seconds', titleHi: '1-100 का वर्ग 3 सेकंड में', durationEn: '30 min', durationHi: '30 मिनट', youtubeId: 'Ko5Dl_QGj0g' },
+      { titleEn: 'Vedic Math Multiplication Secrets', titleHi: 'वैदिक गणित गुणा रहस्य', durationEn: '25 min', durationHi: '25 मिनट', youtubeId: 'jsFmgrz3F-k' },
     ],
   },
   {
@@ -75,10 +75,10 @@ const videoTopics: VideoTopic[] = [
     icon: Divide,
     color: 'from-primary to-accent',
     subtopics: [
-      { titleEn: 'Divide Any Number in 5 Seconds', titleHi: 'किसी भी संख्या को 5 सेकंड में भाग दें', durationEn: '10 min', durationHi: '10 मिनट', youtubeId: 'RRaU9Iv3yAc' },
-      { titleEn: 'Big Numbers Division Trick', titleHi: 'बड़ी संख्या भाग ट्रिक', durationEn: '8 min', durationHi: '8 मिनट', youtubeId: 'g9Z58h2yGWQ' },
-      { titleEn: 'Division by 9, 99, 999 in Vedic Math', titleHi: 'वैदिक गणित में 9, 99, 999 से भाग', durationEn: '7 min', durationHi: '7 मिनट', youtubeId: 'IDvQvHDp8z4' },
-      { titleEn: 'Long Division - Fast Vedic Method', titleHi: 'लंबा भाग - तेज वैदिक विधि', durationEn: '12 min', durationHi: '12 मिनट', youtubeId: '7cBRXayBNr4' },
+      { titleEn: 'Divide Any Number in 5 Seconds', titleHi: 'किसी भी संख्या को 5 सेकंड में भाग दें', durationEn: '5 min', durationHi: '5 मिनट', youtubeId: 'RRaU9Iv3yAc' },
+      { titleEn: 'Big Numbers Division Trick', titleHi: 'बड़ी संख्या भाग ट्रिक', durationEn: '9 min', durationHi: '9 मिनट', youtubeId: 'g9Z58h2yGWQ' },
+      { titleEn: 'Division by 9, 99, 999 in Vedic Math', titleHi: 'वैदिक गणित में 9, 99, 999 से भाग', durationEn: '10 min', durationHi: '10 मिनट', youtubeId: 'IDvQvHDp8z4' },
+      { titleEn: 'Long Division - Fast Vedic Method', titleHi: 'लंबा भाग - तेज वैदिक विधि', durationEn: '14 min', durationHi: '14 मिनट', youtubeId: 'ynpUpUZ_CAI' },
     ],
   },
 ];
