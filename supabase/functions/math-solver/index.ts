@@ -108,10 +108,16 @@ If you cannot identify a math problem, return: {"error": "No math problem found"
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    const content: string | undefined = data.choices?.[0]?.message?.content;
+
+    if (!content) {
+      return new Response(JSON.stringify({ error: "Empty response from AI" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Parse JSON from the response, handling possible markdown code blocks
-    let parsed;
+    let parsed: Record<string, unknown>;
     try {
       const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       parsed = JSON.parse(cleaned);
