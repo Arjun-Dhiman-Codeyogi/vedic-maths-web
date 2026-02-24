@@ -159,6 +159,102 @@ const Dashboard = () => {
           </Link>
         </motion.div>
       )}
+
+      {/* Daily Brain Teaser */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="bg-card rounded-xl p-4 shadow-card border border-border"
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
+            <Brain className="w-4 h-4 text-primary-foreground" />
+          </div>
+          <h3 className="font-display font-bold text-sm">{t('🧩 Daily Brain Teaser', '🧩 आज की पहेली')}</h3>
+        </div>
+        {(() => {
+          const teasers = [
+            { q: t('If 111 × 111 = 12321, what is 1111 × 1111?', 'अगर 111 × 111 = 12321, तो 1111 × 1111 = ?'), hint: t('Look at the pattern! 🔢', 'पैटर्न देखो! 🔢') },
+            { q: t('What is 25% of 25% of 400?', '400 का 25% का 25% क्या है?'), hint: t('Break it step by step!', 'एक-एक कदम से करो!') },
+            { q: t('A number doubled is 50. What is half of that number?', 'एक संख्या को दोगुना करने पर 50 आता है। उस संख्या का आधा क्या है?'), hint: t('Think backwards! 🔙', 'उल्टा सोचो! 🔙') },
+            { q: t('How many squares on a chess board?', 'शतरंज बोर्ड पर कितने वर्ग हैं?'), hint: t('It\'s not 64! Count all sizes 🤯', 'ये 64 नहीं है! सभी आकार गिनो 🤯') },
+            { q: t('What comes next: 2, 6, 12, 20, 30, ?', 'अगला क्या आएगा: 2, 6, 12, 20, 30, ?'), hint: t('Check the differences!', 'अंतर देखो!') },
+            { q: t('999 × 7 = ? (Solve in 3 seconds!)', '999 × 7 = ? (3 सेकंड में हल करो!)'), hint: t('Use Vedic trick: (1000-1) × 7', 'वैदिक ट्रिक: (1000-1) × 7') },
+            { q: t('If you write all numbers from 1 to 100, how many times do you write 9?', '1 से 100 तक लिखने में 9 कितनी बार आएगा?'), hint: t('Count units + tens place!', 'इकाई + दहाई दोनों गिनो!') },
+          ];
+          const today = new Date().getDay();
+          const teaser = teasers[today % teasers.length];
+          return (
+            <div>
+              <p className="text-sm font-medium text-foreground mb-2">{teaser.q}</p>
+              <p className="text-xs text-muted-foreground italic">💡 {teaser.hint}</p>
+            </div>
+          );
+        })()}
+        <Link to="/practice" className="inline-flex items-center gap-1 mt-3 text-xs font-bold text-primary">
+          {t('Solve More →', 'और हल करें →')}
+        </Link>
+      </motion.div>
+
+      {/* Fun Math Facts */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+        className="bg-card rounded-xl p-4 shadow-card border border-border"
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+            <Star className="w-4 h-4 text-secondary-foreground" />
+          </div>
+          <h3 className="font-display font-bold text-sm">{t('✨ Did You Know?', '✨ क्या आप जानते हैं?')}</h3>
+        </div>
+        {(() => {
+          const facts = [
+            t('The number 142857 is magical! Multiply it by 1-6 and get the same digits rearranged! 🤯', '142857 एक जादुई संख्या है! इसे 1-6 से गुणा करो और वही अंक अलग क्रम में आएंगे! 🤯'),
+            t('Zero was invented in India by Aryabhatta! 🇮🇳', 'शून्य का आविष्कार भारत में आर्यभट्ट ने किया था! 🇮🇳'),
+            t('A pizza that has radius "z" and height "a" has volume = Pi × z × z × a! 🍕', 'एक पिज्जा जिसकी त्रिज्या "z" और ऊंचाई "a" है, उसका आयतन = Pi × z × z × a! 🍕'),
+            t('111,111,111 × 111,111,111 = 12345678987654321! Beautiful! ✨', '111,111,111 × 111,111,111 = 12345678987654321! कितना सुंदर! ✨'),
+            t('If you shuffle a deck of cards, the order has likely never existed before in history! 🃏', 'अगर आप ताश की गड्डी फेंटें, तो वो क्रम शायद इतिहास में पहले कभी नहीं आया! 🃏'),
+            t('The word "hundred" comes from "hundrath" which means 120, not 100! 💯', '"Hundred" शब्द "hundrath" से आया है जिसका मतलब 120 था, 100 नहीं! 💯'),
+            t('Vedic Math can help you multiply any 2-digit number by 11 in seconds! Try 45×11 = 4_5, put 4+5=9 in middle = 495! ⚡', 'वैदिक गणित से 11 से गुणा सेकंडों में! 45×11 = 4_5, बीच में 4+5=9 = 495! ⚡'),
+          ];
+          const today = new Date().getDate();
+          return <p className="text-sm text-foreground">{facts[today % facts.length]}</p>;
+        })()}
+      </motion.div>
+
+      {/* Quick Challenges */}
+      <div>
+        <h3 className="font-display font-bold text-base mb-3">{t('🎯 Quick Challenges', '🎯 त्वरित चुनौतियाँ')}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {[
+            { title: t('Speed Round', 'स्पीड राउंड'), desc: t('Solve 10 problems in 60 seconds', '60 सेकंड में 10 सवाल हल करें'), icon: '⚡', path: '/practice' },
+            { title: t('Vedic Tricks', 'वैदिक ट्रिक्स'), desc: t('Learn a new mental math shortcut', 'नई मानसिक गणित शॉर्टकट सीखें'), icon: '🧠', path: '/learn' },
+            { title: t('Photo Challenge', 'फोटो चैलेंज'), desc: t('Snap & solve a real-world math problem', 'असली दुनिया का गणित सवाल फोटो से हल करें'), icon: '📸', path: '/solver' },
+          ].map((challenge, i) => (
+            <motion.div
+              key={challenge.title}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.8 + i * 0.1 }}
+            >
+              <Link
+                to={challenge.path}
+                className="flex items-center gap-3 p-4 bg-card rounded-xl shadow-card border border-border hover:shadow-elevated transition-shadow"
+              >
+                <span className="text-2xl">{challenge.icon}</span>
+                <div className="flex-1">
+                  <p className="font-display font-bold text-sm">{challenge.title}</p>
+                  <p className="text-xs text-muted-foreground">{challenge.desc}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground" />
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
