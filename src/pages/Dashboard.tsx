@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { Link } from 'react-router-dom';
 import { BookOpen, Brain, Calculator, Camera, Trophy, TrendingUp, Target, Zap, Star, ArrowRight, Calendar } from 'lucide-react';
+import DailyBrainTeaser from '@/components/DailyBrainTeaser';
 import { Progress } from '@/components/ui/progress';
 
 const quickActions = [
@@ -161,41 +162,7 @@ const Dashboard = () => {
       )}
 
       {/* Daily Brain Teaser */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="bg-card rounded-xl p-4 shadow-card border border-border"
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-            <Brain className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <h3 className="font-display font-bold text-sm">{t('🧩 Daily Brain Teaser', '🧩 आज की पहेली')}</h3>
-        </div>
-        {(() => {
-          const teasers = [
-            { q: t('If 111 × 111 = 12321, what is 1111 × 1111?', 'अगर 111 × 111 = 12321, तो 1111 × 1111 = ?'), hint: t('Look at the pattern! 🔢', 'पैटर्न देखो! 🔢') },
-            { q: t('What is 25% of 25% of 400?', '400 का 25% का 25% क्या है?'), hint: t('Break it step by step!', 'एक-एक कदम से करो!') },
-            { q: t('A number doubled is 50. What is half of that number?', 'एक संख्या को दोगुना करने पर 50 आता है। उस संख्या का आधा क्या है?'), hint: t('Think backwards! 🔙', 'उल्टा सोचो! 🔙') },
-            { q: t('How many squares on a chess board?', 'शतरंज बोर्ड पर कितने वर्ग हैं?'), hint: t('It\'s not 64! Count all sizes 🤯', 'ये 64 नहीं है! सभी आकार गिनो 🤯') },
-            { q: t('What comes next: 2, 6, 12, 20, 30, ?', 'अगला क्या आएगा: 2, 6, 12, 20, 30, ?'), hint: t('Check the differences!', 'अंतर देखो!') },
-            { q: t('999 × 7 = ? (Solve in 3 seconds!)', '999 × 7 = ? (3 सेकंड में हल करो!)'), hint: t('Use Vedic trick: (1000-1) × 7', 'वैदिक ट्रिक: (1000-1) × 7') },
-            { q: t('If you write all numbers from 1 to 100, how many times do you write 9?', '1 से 100 तक लिखने में 9 कितनी बार आएगा?'), hint: t('Count units + tens place!', 'इकाई + दहाई दोनों गिनो!') },
-          ];
-          const today = new Date().getDay();
-          const teaser = teasers[today % teasers.length];
-          return (
-            <div>
-              <p className="text-sm font-medium text-foreground mb-2">{teaser.q}</p>
-              <p className="text-xs text-muted-foreground italic">💡 {teaser.hint}</p>
-            </div>
-          );
-        })()}
-        <Link to="/practice" className="inline-flex items-center gap-1 mt-3 text-xs font-bold text-primary">
-          {t('Solve More →', 'और हल करें →')}
-        </Link>
-      </motion.div>
+      <DailyBrainTeaser />
 
       {/* Fun Math Facts */}
       <motion.div
