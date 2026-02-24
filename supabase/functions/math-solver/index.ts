@@ -1,12 +1,10 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
@@ -45,7 +43,10 @@ IMPORTANT: You MUST respond in this exact JSON format (no markdown, no code bloc
 If there are multiple problems in the image, solve only the first/main one.
 If you cannot identify a math problem, return: {"error": "No math problem found"}`;
 
-    const userContent: any[] = [];
+    type ContentPart =
+      | { type: "image_url"; image_url: { url: string } }
+      | { type: "text"; text: string };
+    const userContent: ContentPart[] = [];
 
     if (imageBase64) {
       // Remove data:image/...;base64, prefix if present

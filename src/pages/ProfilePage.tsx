@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { supabase } from '@/integrations/supabase/client';
-import { User, TrendingUp, Target, Zap, Brain, BarChart3, Globe, Flame, LogIn, LogOut, Calendar } from 'lucide-react';
+import { User as UserIcon, TrendingUp, Target, Zap, Brain, BarChart3, Globe, Flame, LogIn, LogOut, Calendar } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const ProfilePage = () => {
@@ -91,7 +91,7 @@ const ProfilePage = () => {
       >
         <div className="absolute -left-8 -bottom-8 w-24 h-24 rounded-full bg-white/10" />
         <div className="w-16 h-16 gradient-warm rounded-full flex items-center justify-center mx-auto mb-2 border-4 border-white/30 shadow-lg">
-          <User className="w-8 h-8 text-primary-foreground" />
+          <UserIcon className="w-8 h-8 text-primary-foreground" />
         </div>
         <h2 className="font-display font-bold text-xl">{student.name}</h2>
         <p className="text-sm opacity-80">{t('Class', 'कक्षा')} {student.classGrade} • {t('Level', 'स्तर')} {student.level}</p>
