@@ -43,8 +43,8 @@ const AuthPage = () => {
         toast({ title: t('Account created! Logging in...', 'अकाउंट बन गया! लॉगिन हो रहा है...') });
         navigate('/');
       }
-    } catch (error: any) {
-      toast({ title: t('Error', 'त्रुटि'), description: error.message, variant: 'destructive' });
+    } catch (error) {
+      toast({ title: t('Error', 'त्रुटि'), description: error instanceof Error ? error.message : 'An error occurred', variant: 'destructive' });
     } finally {
       setLoading(false);
     }

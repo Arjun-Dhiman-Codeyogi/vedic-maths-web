@@ -46,8 +46,9 @@ const SolverPage = () => {
 
   // Cleanup TTS and camera on unmount
   useEffect(() => {
+    const synth = synthRef.current;
     return () => {
-      synthRef.current.cancel();
+      synth.cancel();
       cameraStream?.getTracks().forEach(t => t.stop());
     };
   }, [cameraStream]);
@@ -128,8 +129,8 @@ const SolverPage = () => {
       if (data?.error) throw new Error(data.error);
 
       setSolution(data as SolutionData);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setSolving(false);
     }
@@ -219,8 +220,8 @@ const SolverPage = () => {
           } catch { /* partial JSON, skip */ }
         }
       }
-    } catch (err: any) {
-      setChatMessages(prev => [...prev, { role: 'assistant', content: `❌ ${err.message}` }]);
+    } catch (err) {
+      setChatMessages(prev => [...prev, { role: 'assistant', content: `❌ ${err instanceof Error ? err.message : 'Something went wrong'}` }]);
     } finally {
       setChatLoading(false);
     }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,7 +13,7 @@ const ProfilePage = () => {
   const { student, daysCount } = useGame();
   const navigate = useNavigate();
   const xpPercent = Math.round((student.xp / student.xpToNext) * 100);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {

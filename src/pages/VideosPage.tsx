@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Play, Plus, Minus, X as TimesIcon, Divide, BookOpen, Brain, Sparkles, ArrowLeft } from 'lucide-react';
+import { Play, Plus, Minus, X as TimesIcon, Divide, BookOpen, Brain, Sparkles, ArrowLeft, type LucideIcon } from 'lucide-react';
 
 interface VideoItem {
   titleEn: string;
@@ -17,7 +17,7 @@ interface VideoTopic {
   titleHi: string;
   descEn: string;
   descHi: string;
-  icon: any;
+  icon: LucideIcon;
   color: string;
   subtopics: VideoItem[];
 }

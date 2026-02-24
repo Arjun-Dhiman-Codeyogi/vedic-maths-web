@@ -277,7 +277,7 @@ const PracticePage = () => {
       setIsPlaying(false);
       addXP(score);
     }
-  }, [timeLeft]);
+  }, [timeLeft, addXP, isPlaying, score]);
 
   const handleCategoryChange = (cat: PracticeCategory) => {
     setCategory(cat);
@@ -320,7 +320,7 @@ const PracticePage = () => {
       setProblem(generateProblem(difficulty, operation));
       setShowVedicHint(false);
     }, 800);
-  }, [userAnswer, problem, difficulty, operation, streak]);
+  }, [userAnswer, problem, difficulty, operation, streak, updateAccuracy]);
 
   const handleKeyPad = (key: string) => {
     if (key === 'del') setUserAnswer(prev => prev.slice(0, -1));
