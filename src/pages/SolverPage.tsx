@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Camera, Upload, Wand2, Clock, X, Volume2, VolumeX, Send, Loader2, Sparkles, MessageCircle, Globe } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 
 type SolutionData = {
@@ -15,6 +14,9 @@ type SolutionData = {
 
 type ChatMsg = { role: 'user' | 'assistant'; content: string };
 
+const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/math-solver`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solver-chat`;
+
 const SolverPage = () => {
   const { t, lang } = useLanguage();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -23,6 +25,9 @@ const SolverPage = () => {
   const [solving, setSolving] = useState(false);
   const [error, setError] = useState('');
   const [solutionLang, setSolutionLang] = useState<'en' | 'hi'>(lang as 'en' | 'hi');
+
+  // Synchronous guard — React setState is async so it can't block concurrent calls
+  const solvingRef = useRef(false);
 
   // TTS
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -33,6 +38,22 @@ const SolverPage = () => {
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Compress to max 600px, quality 0.65 — keeps payload under ~40KB
+  const compressImage = (dataUrl: string): Promise<string> =>
+    new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 600;
+        let { width, height } = img;
+        if (width > MAX) { height = Math.round((height * MAX) / width); width = MAX; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.65));
+      };
+      img.src = dataUrl;
+    });
 
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -73,7 +94,7 @@ const SolverPage = () => {
     }
   };
 
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -82,10 +103,11 @@ const SolverPage = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.drawImage(video, 0, 0);
-    const base64 = canvas.toDataURL('image/jpeg', 0.85);
+    const raw = canvas.toDataURL('image/jpeg', 0.85);
     closeCamera();
-    setCapturedImage(base64);
-    solveProblem(base64, null);
+    const compressed = await compressImage(raw);
+    setCapturedImage(compressed);
+    solveProblem(compressed, null);
   };
 
   const closeCamera = () => {
@@ -96,15 +118,17 @@ const SolverPage = () => {
 
   const handleImageCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const base64 = ev.target?.result as string;
-        setCapturedImage(base64);
-        solveProblem(base64, null);
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const raw = ev.target?.result as string;
+      const compressed = await compressImage(raw);
+      setCapturedImage(compressed);
+      solveProblem(compressed, null);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleTextSolve = () => {
@@ -113,6 +137,10 @@ const SolverPage = () => {
   };
 
   const solveProblem = async (imageBase64: string | null, textProblem: string | null) => {
+    // solvingRef is synchronous — blocks any concurrent call instantly
+    if (solvingRef.current) return;
+    solvingRef.current = true;
+
     setSolving(true);
     setError('');
     setSolution(null);
@@ -121,17 +149,23 @@ const SolverPage = () => {
     setIsSpeaking(false);
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('math-solver', {
-        body: { imageBase64, textProblem },
+      const res = await fetch(FN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64, textProblem }),
       });
 
-      if (fnError) throw new Error(fnError.message);
+      const data = await res.json();
+
+      if (res.status === 429) throw new Error('rate_limit');
+      if (!res.ok) throw new Error(data?.error ?? `Server error ${res.status}`);
       if (data?.error) throw new Error(data.error);
 
       setSolution(data as SolutionData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
+      solvingRef.current = false;
       setSolving(false);
     }
   };
@@ -175,7 +209,7 @@ const SolverPage = () => {
       : '';
 
     try {
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solver-chat`, {
+      const resp = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -300,9 +334,18 @@ const SolverPage = () => {
 
       {/* Error */}
       {error && (
-        <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 text-center">
-          <p className="text-sm text-destructive font-medium">{error}</p>
-          <button onClick={() => { setError(''); setCapturedImage(null); }} className="mt-2 text-xs text-primary underline">{t('Try again', 'दोबारा कोशिश करें')}</button>
+        <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 text-center space-y-2">
+          <p className="text-sm text-destructive font-medium">
+            {error === 'rate_limit'
+              ? t('Please wait a moment and try again.', 'थोड़ा रुको और दोबारा कोशिश करो।')
+              : t('Something went wrong. Please try again.', 'कुछ गलत हुआ। दोबारा कोशिश करो।')}
+          </p>
+          <button
+            onClick={() => { setError(''); capturedImage ? solveProblem(capturedImage, null) : solveProblem(null, textInput); }}
+            className="mt-2 px-4 py-1.5 text-sm font-semibold bg-primary text-primary-foreground rounded-lg"
+          >
+            {t('Try Again →', 'दोबारा कोशिश करें →')}
+          </button>
         </div>
       )}
 

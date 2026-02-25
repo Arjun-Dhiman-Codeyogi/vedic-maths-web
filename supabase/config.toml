@@ -1,1 +1,7 @@
 project_id = "sgidfwrnvxbcwslqxpim"
+
+[functions.math-solver]
+verify_jwt = false
+
+[functions.solver-chat]
+verify_jwt = false
